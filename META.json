@@ -1,0 +1,54 @@
+{
+   "name": "hashlib",
+   "abstract": "High-performance hash functions for PostgreSQL",
+   "description": "A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, with plans to add more hash algorithms like SHA-256, Blake3, and CityHash.",
+   "version": "0.1.0",
+   "maintainer": [
+      "Your Name <your.email@example.com>"
+   ],
+   "license": "postgresql",
+   "provides": {
+      "hashlib": {
+         "abstract": "High-performance hash functions for PostgreSQL",
+         "file": "sql/hashlib--0.0.1.sql",
+         "docfile": "README.md",
+         "version": "0.1.0"
+      }
+   },
+   "prereqs": {
+      "runtime": {
+         "requires": {
+            "PostgreSQL": "12.0.0"
+         }
+      }
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "https://github.com/yourusername/pghashlib/issues"
+      },
+      "repository": {
+         "url": "git://github.com/yourusername/pghashlib.git",
+         "web": "https://github.com/yourusername/pghashlib",
+         "type": "git"
+      },
+      "homepage": "https://github.com/yourusername/pghashlib"
+   },
+   "generated_by": "hand-written",
+   "meta-spec": {
+      "version": "1.0.0",
+      "url": "https://pgxn.org/meta/spec.txt"
+   },
+   "tags": [
+      "hash function",
+      "murmur",
+      "murmurhash3",
+      "hash",
+      "performance",
+      "data processing",
+      "partitioning",
+      "sampling",
+      "fingerprint",
+      "non-cryptographic"
+   ],
+   "release_status": "stable"
+} 

@@ -1,0 +1,13 @@
+Revision history for PostgreSQL hashlib extension
+
+0.1.0 2024-01-XX
+    - Initial release
+    - Added MurmurHash3 32-bit implementation
+    - Support for text, bytea, and integer inputs
+    - Optional seed parameter for hash customization
+    - Comprehensive test suite
+    - GitHub Actions CI/CD pipeline
+    - Docker support for development
+    - PGXN metadata and distribution support
+    - PostgreSQL 12-17 compatibility
+    - Detailed README with installation instructions 

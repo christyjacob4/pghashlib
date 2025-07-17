@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up PostgreSQL 17
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-17 postgresql-server-dev-17
+        sudo systemctl start postgresql
+        sudo -u postgres createuser -s runner
+    
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Build extension
+      run: |
+        export PG_CONFIG=/usr/bin/pg_config
+        make clean
+        make
+    
+    - name: Run tests
+      run: |
+        export PG_CONFIG=/usr/bin/pg_config
+        sudo make install
+        make installcheck PGUSER=runner
+    
+    - name: Create distribution package
+      run: |
+        mkdir -p dist
+        # Create a clean copy for distribution
+        rsync -av --exclude='.git*' --exclude='dist' --exclude='*.o' --exclude='*.so' . dist/hashlib-${{ steps.version.outputs.VERSION }}/
+        cd dist
+        zip -r hashlib-${{ steps.version.outputs.VERSION }}.zip hashlib-${{ steps.version.outputs.VERSION }}/
+        tar -czf hashlib-${{ steps.version.outputs.VERSION }}.tar.gz hashlib-${{ steps.version.outputs.VERSION }}/
+    
+    - name: Generate checksums
+      run: |
+        cd dist
+        sha256sum hashlib-${{ steps.version.outputs.VERSION }}.zip > hashlib-${{ steps.version.outputs.VERSION }}.zip.sha256
+        sha256sum hashlib-${{ steps.version.outputs.VERSION }}.tar.gz > hashlib-${{ steps.version.outputs.VERSION }}.tar.gz.sha256
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ steps.version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        files: |
+          dist/hashlib-${{ steps.version.outputs.VERSION }}.zip
+          dist/hashlib-${{ steps.version.outputs.VERSION }}.tar.gz
+          dist/hashlib-${{ steps.version.outputs.VERSION }}.zip.sha256
+          dist/hashlib-${{ steps.version.outputs.VERSION }}.tar.gz.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

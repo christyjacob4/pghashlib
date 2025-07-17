@@ -1,0 +1,5 @@
+# hashlib extension
+comment = 'Non-cryptographic hash functions for PostgreSQL'
+default_version = '0.0.1'
+module_pathname = '$libdir/hashlib'
+relocatable = true

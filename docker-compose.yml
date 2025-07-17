@@ -1,0 +1,10 @@
+services:
+  postgres:
+    build: .
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./:/tmp/pg_hello_world

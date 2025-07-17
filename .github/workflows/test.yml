@@ -1,0 +1,65 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        postgres: [12, 13, 14, 15, 16, 17]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up PostgreSQL ${{ matrix.postgres }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-${{ matrix.postgres }} postgresql-server-dev-${{ matrix.postgres }}
+        sudo systemctl start postgresql
+        sudo -u postgres createuser -s runner
+    
+    - name: Build extension
+      run: |
+        export PG_CONFIG=/usr/bin/pg_config
+        make clean
+        make
+    
+    - name: Install extension
+      run: |
+        export PG_CONFIG=/usr/bin/pg_config
+        sudo make install
+    
+    - name: Run tests
+      run: |
+        export PG_CONFIG=/usr/bin/pg_config
+        make installcheck PGUSER=runner
+    
+    - name: Show test diff on failure
+      if: failure()
+      run: |
+        if [ -f regression.diffs ]; then
+          echo "=== Test failures ==="
+          cat regression.diffs
+        fi
+
+  docker-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build and test with Docker
+      run: |
+        docker compose up -d --build
+        docker compose exec -T postgres make test
+    
+    - name: Cleanup
+      if: always()
+      run: docker compose down 
