@@ -41,7 +41,7 @@ jobs:
           export PG_CONFIG=`which pg_config`
           echo "Building with PG_CONFIG: $PG_CONFIG"
           make clean
-          PG_CONFIG="$PG_CONFIG" make
+          make PG_CONFIG="$PG_CONFIG"
         env:
           PG_CFLAGS: -DUSE_ASSERT_CHECKING -Wall -Wextra -Werror -Wno-unused-parameter -Wno-sign-compare
       
@@ -54,9 +54,9 @@ jobs:
           echo "Library directory: `pg_config --pkglibdir`"
           echo "PGXS path: `$PG_CONFIG --pgxs`"
           echo "Debugging make variables:"
-          PG_CONFIG="$PG_CONFIG" make -n install | head -10
+          make PG_CONFIG="$PG_CONFIG" -n install | head -10
           echo "Actually installing:"
-          sudo env PG_CONFIG="$PG_CONFIG" make install
+          sudo make PG_CONFIG="$PG_CONFIG" install
           echo "Checking installed files:"
           ls -la `pg_config --sharedir`/extension/hashlib* || echo "No hashlib files found in extension directory"
           ls -la `pg_config --pkglibdir`/hashlib* || echo "No hashlib files found in library directory"
