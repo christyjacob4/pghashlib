@@ -48,23 +48,10 @@ jobs:
           echo "PostgreSQL version: `pg_config --version`"
           echo "Extension directory: `pg_config --sharedir`/extension"
           echo "Library directory: `pg_config --pkglibdir`"
-          sudo --preserve-env=PG_CONFIG make install
+          sudo PG_CONFIG="$PG_CONFIG" make install
           echo "Checking installed files:"
           ls -la `pg_config --sharedir`/extension/hashlib* || echo "No hashlib files found in extension directory"
           ls -la `pg_config --pkglibdir`/hashlib* || echo "No hashlib files found in library directory"
-          
-          # Manual verification and fix if needed
-          SHAREDIR=`pg_config --sharedir`
-          if [ ! -f "$SHAREDIR/extension/hashlib.control" ]; then
-            echo "Control file not found, copying manually..."
-            sudo cp hashlib.control "$SHAREDIR/extension/"
-            echo "Copied hashlib.control to $SHAREDIR/extension/"
-          fi
-          if [ ! -f "$SHAREDIR/extension/hashlib--0.0.1.sql" ]; then
-            echo "SQL file not found, copying manually..."
-            sudo cp sql/hashlib--0.0.1.sql "$SHAREDIR/extension/"
-            echo "Copied hashlib--0.0.1.sql to $SHAREDIR/extension/"
-          fi
       
       - name: Run tests
         run: make installcheck
