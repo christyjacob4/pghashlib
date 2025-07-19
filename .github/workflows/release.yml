@@ -9,16 +9,29 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up PostgreSQL 17
+    - name: Install PostgreSQL client and dev tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y postgresql-17 postgresql-server-dev-17
-        sudo systemctl start postgresql
-        sudo -u postgres createuser -s runner
+        sudo apt-get install -y postgresql-client postgresql-server-dev-all
     
     - name: Extract version from tag
       id: version
@@ -29,12 +42,20 @@ jobs:
         export PG_CONFIG=/usr/bin/pg_config
         make clean
         make
+      env:
+        PGHOST: localhost
+        PGPORT: 5432
+        PGUSER: postgres
+        PGPASSWORD: postgres
+        PGDATABASE: postgres
     
     - name: Run tests
       run: |
         export PG_CONFIG=/usr/bin/pg_config
         sudo make install
-        make installcheck PGUSER=runner
+        make installcheck PGUSER=postgres PGHOST=localhost PGPORT=5432 PGDATABASE=postgres
+      env:
+        PGPASSWORD: postgres
     
     - name: Create distribution package
       run: |
