@@ -13,57 +13,49 @@ jobs:
       matrix:
         postgres: [12, 13, 14, 15, 16]
     
-    services:
-      postgres:
-        image: postgres:${{ matrix.postgres }}
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Install PostgreSQL client and dev tools
+    - name: Install PostgreSQL ${{ matrix.postgres }}
       run: |
+        # Add PostgreSQL APT repository
         sudo apt-get update
-        sudo apt-get install -y postgresql-client postgresql-server-dev-all
+        sudo apt-get install -y wget ca-certificates
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+        
+        # Update and install PostgreSQL
+        sudo apt-get update
+        sudo apt-get install -y postgresql-${{ matrix.postgres }} postgresql-server-dev-${{ matrix.postgres }} postgresql-client-${{ matrix.postgres }}
+        
+        # Start PostgreSQL
+        sudo systemctl start postgresql
+        sudo systemctl enable postgresql
+        
+        # Configure PostgreSQL
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+        sudo -u postgres createdb test_db
+    
+    - name: Install build dependencies
+      run: |
+        sudo apt-get install -y build-essential
     
     - name: Build extension
       run: |
-        export PG_CONFIG=/usr/bin/pg_config
+        export PG_CONFIG=/usr/lib/postgresql/${{ matrix.postgres }}/bin/pg_config
         make clean
         make
-      env:
-        PGHOST: localhost
-        PGPORT: 5432
-        PGUSER: postgres
-        PGPASSWORD: postgres
-        PGDATABASE: postgres
     
     - name: Install extension
       run: |
-        export PG_CONFIG=/usr/bin/pg_config
+        export PG_CONFIG=/usr/lib/postgresql/${{ matrix.postgres }}/bin/pg_config
         sudo make install
-      env:
-        PGHOST: localhost
-        PGPORT: 5432
-        PGUSER: postgres
-        PGPASSWORD: postgres
-        PGDATABASE: postgres
     
     - name: Run tests
       run: |
-        export PG_CONFIG=/usr/bin/pg_config
-        make installcheck PGUSER=postgres PGHOST=localhost PGPORT=5432 PGDATABASE=postgres
+        export PG_CONFIG=/usr/lib/postgresql/${{ matrix.postgres }}/bin/pg_config
+        make installcheck PGUSER=postgres PGDATABASE=test_db
       env:
         PGPASSWORD: postgres
     
@@ -75,17 +67,23 @@ jobs:
           cat regression.diffs
         fi
 
-  docker-test:
+  docker-compose-test:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Build and test with Docker
+    - name: Build and test with Docker Compose
       run: |
         docker compose up -d --build
-        docker compose exec -T postgres make test
+        # Wait for PostgreSQL to be ready
+        sleep 10
+        # Run tests with proper connection parameters
+        docker compose exec -T postgres bash -c "
+          cd /tmp/pghashlib &&
+          PGHOST=localhost PGPORT=5432 PGUSER=root PGPASSWORD=password PGDATABASE=postgres make installcheck
+        "
     
     - name: Cleanup
       if: always()
