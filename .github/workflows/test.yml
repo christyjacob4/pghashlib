@@ -1,4 +1,4 @@
-name: Test
+name: Tests
 
 on:
   pull_request:
@@ -67,7 +67,28 @@ jobs:
           cat regression.diffs
         fi
 
-  docker-compose-test:
+  valgrind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PostgreSQL with Valgrind
+        uses: ankane/setup-postgres-valgrind@v1
+        with:
+          postgres-version: 17
+          check-ub: yes
+      
+      - name: Build extension
+        run: make OPTFLAGS=""
+      
+      - name: Install extension
+        run: sudo --preserve-env=PG_CONFIG make install
+      
+      - name: Run tests with Valgrind
+        run: make installcheck
+
+  docker-test:
     runs-on: ubuntu-latest
     
     steps:
@@ -77,11 +98,11 @@ jobs:
     - name: Build and test with Docker Compose
       run: |
         docker compose up -d --build
+        
         # Wait for PostgreSQL to be ready
         sleep 10
-        
+
         docker compose exec postgres make installcheck
-    
     - name: Cleanup
       if: always()
       run: docker compose down 
