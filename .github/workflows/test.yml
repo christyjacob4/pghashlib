@@ -79,11 +79,8 @@ jobs:
         docker compose up -d --build
         # Wait for PostgreSQL to be ready
         sleep 10
-        # Run tests with proper connection parameters
-        docker compose exec -T postgres bash -c "
-          cd /tmp/pghashlib &&
-          PGHOST=localhost PGPORT=5432 PGUSER=root PGPASSWORD=password PGDATABASE=postgres make installcheck
-        "
+        
+        docker compose exec postgres make installcheck
     
     - name: Cleanup
       if: always()
