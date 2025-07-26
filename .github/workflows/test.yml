@@ -8,6 +8,7 @@ on:
 
 jobs:
   ubuntu:
+    name: PostgreSQL ${{ matrix.postgres }} • Ubuntu ${{ matrix.ubuntu_version }} (${{ matrix.arch }})
     runs-on: ubuntu-${{ matrix.ubuntu_version }}${{ matrix.arch == 'arm64' && '-arm' || '' }}
     if: ${{ !startsWith(github.ref_name, 'mac') && !startsWith(github.ref_name, 'windows') }}
     strategy:
