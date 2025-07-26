@@ -48,12 +48,6 @@ jobs:
       - name: Install extension
         run: |
           export PG_CONFIG=`which pg_config`
-          echo "Using PG_CONFIG: $PG_CONFIG"
-          echo "PostgreSQL version: `pg_config --version`"
-          echo "Extension directory: `pg_config --sharedir`/extension"
-          echo "Library directory: `pg_config --pkglibdir`"
-          echo "PGXS path: `$PG_CONFIG --pgxs`"
-          echo "Debugging make variables:"
           make PG_CONFIG="$PG_CONFIG" -n install | head -10
           echo "Actually installing:"
           sudo make PG_CONFIG="$PG_CONFIG" install
