@@ -8,24 +8,23 @@ on:
 
 jobs:
   ubuntu:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}${{ matrix.arch == 'arm64' && '-arm' || '' }}
     if: ${{ !startsWith(github.ref_name, 'mac') && !startsWith(github.ref_name, 'windows') }}
     strategy:
       fail-fast: false
       matrix:
-        include:
+        postgres: [12, 13, 14, 15, 16, 17]
+        ubuntu_version: ["22.04", "24.04"]
+        arch: [x64, arm64]
+        exclude:
+          # PostgreSQL 17 not available on Ubuntu 22.04 yet
           - postgres: 17
-            os: ubuntu-24.04
-          - postgres: 16
-            os: ubuntu-24.04-arm
-          - postgres: 15
-            os: ubuntu-22.04
-          - postgres: 14
-            os: ubuntu-22.04-arm
-          - postgres: 13
-            os: ubuntu-22.04
+            ubuntu_version: "22.04"
+          # Skip ARM for older PostgreSQL versions to save CI time
           - postgres: 12
-            os: ubuntu-22.04
+            arch: arm64
+          - postgres: 13
+            arch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
