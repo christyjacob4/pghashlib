@@ -215,6 +215,7 @@ LANGUAGE C IMMUTABLE STRICT;
 CREATE OR REPLACE FUNCTION lookup3le(integer, integer)
 RETURNS integer
 AS 'MODULE_PATHNAME', 'lookup3le_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
 
 -- lookup3be function for text (default initval = 0)
 CREATE OR REPLACE FUNCTION lookup3be(text)
