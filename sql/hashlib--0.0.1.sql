@@ -144,3 +144,39 @@ CREATE OR REPLACE FUNCTION cityhash128(integer, bigint, bigint)
 RETURNS bigint[]
 AS 'MODULE_PATHNAME', 'cityhash128_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup2 function for text (default initval = 0)
+CREATE OR REPLACE FUNCTION lookup2(text)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup2_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup2 function for text with custom initval
+CREATE OR REPLACE FUNCTION lookup2(text, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup2_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup2 function for bytea (default initval = 0)
+CREATE OR REPLACE FUNCTION lookup2(bytea)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup2_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup2 function for bytea with custom initval
+CREATE OR REPLACE FUNCTION lookup2(bytea, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup2_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup2 function for integer (default initval = 0)
+CREATE OR REPLACE FUNCTION lookup2(integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup2_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup2 function for integer with custom initval
+CREATE OR REPLACE FUNCTION lookup2(integer, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup2_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
