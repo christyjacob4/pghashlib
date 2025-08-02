@@ -122,6 +122,9 @@ HashLen33to64(const char *s, size_t len)
 static uint64_t
 cityhash64_with_seed(const char *s, size_t len, uint64_t seed)
 {
+    uint64_t x, y, z, v_first, v_second, w_first, w_second, mul;
+    const char *end, *last64;
+    
     if (len <= 32) {
         if (len <= 16) {
             return HashLen16(len + seed, HashLen0to16(s, len));
@@ -135,8 +138,6 @@ cityhash64_with_seed(const char *s, size_t len, uint64_t seed)
     }
     
     /* For strings over 64 bytes, we use a simplified version */
-    uint64_t x, y, z, v_first, v_second, w_first, w_second, mul;
-    const char *end, *last64;
     
     x = seed;
     y = seed * k1 + 113;
