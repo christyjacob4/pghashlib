@@ -6,5 +6,8 @@ services:
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
     volumes:
-      - ./:/tmp/pg_hello_world
+      - ./:/tmp/pghashlib
+    ports:
+      - "5432:5432"

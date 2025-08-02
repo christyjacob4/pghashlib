@@ -1,4 +1,4 @@
-name: Test
+name: Tests
 
 on:
   pull_request:
@@ -7,59 +7,75 @@ on:
     branches: [ main, master ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  ubuntu:
+    name: PostgreSQL ${{ matrix.postgres }} • Ubuntu ${{ matrix.ubuntu_version }} (${{ matrix.arch }})
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}${{ matrix.arch == 'arm64' && '-arm' || '' }}
+    if: ${{ !startsWith(github.ref_name, 'mac') && !startsWith(github.ref_name, 'windows') }}
     strategy:
+      fail-fast: false
       matrix:
         postgres: [12, 13, 14, 15, 16, 17]
-    
+        ubuntu_version: ["22.04", "24.04"]
+        arch: [x64, arm64]
+        exclude:
+          # PostgreSQL 17 not available on Ubuntu 22.04 yet
+          - postgres: 17
+            ubuntu_version: "22.04"
+          # Skip ARM for older PostgreSQL versions to save CI time
+          - postgres: 12
+            arch: arm64
+          - postgres: 13
+            arch: arm64
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Set up PostgreSQL ${{ matrix.postgres }}
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-${{ matrix.postgres }} postgresql-server-dev-${{ matrix.postgres }}
-        sudo systemctl start postgresql
-        sudo -u postgres createuser -s runner
-    
-    - name: Build extension
-      run: |
-        export PG_CONFIG=/usr/bin/pg_config
-        make clean
-        make
-    
-    - name: Install extension
-      run: |
-        export PG_CONFIG=/usr/bin/pg_config
-        sudo make install
-    
-    - name: Run tests
-      run: |
-        export PG_CONFIG=/usr/bin/pg_config
-        make installcheck PGUSER=runner
-    
-    - name: Show test diff on failure
-      if: failure()
-      run: |
-        if [ -f regression.diffs ]; then
-          echo "=== Test failures ==="
-          cat regression.diffs
-        fi
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PostgreSQL ${{ matrix.postgres }}
+        uses: ankane/setup-postgres@v1
+        with:
+          postgres-version: ${{ matrix.postgres }}
+          dev-files: true
+      
+      - name: Build extension
+        run: |
+          export PG_CONFIG=`which pg_config`
+          echo "Building with PG_CONFIG: $PG_CONFIG"
+          make clean
+          make PG_CONFIG="$PG_CONFIG"
+        env:
+          PG_CFLAGS: -DUSE_ASSERT_CHECKING -Wall -Wextra -Werror -Wno-unused-parameter -Wno-sign-compare
+      
+      - name: Install extension
+        run: |
+          export PG_CONFIG=`which pg_config`
+          make PG_CONFIG="$PG_CONFIG" -n install | head -10
+          echo "Actually installing:"
+          sudo make PG_CONFIG="$PG_CONFIG" install
+          echo "Checking installed files:"
+          ls -la `pg_config --sharedir`/extension/hashlib* || echo "No hashlib files found in extension directory"
+          ls -la `pg_config --pkglibdir`/hashlib* || echo "No hashlib files found in library directory"
+      
+      - name: Run tests
+        run: make installcheck
+      
+      - name: Show test diff on failure
+        if: failure()
+        run: cat regression.diffs
 
   docker-test:
     runs-on: ubuntu-latest
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Build and test with Docker
+    - name: Build and test with Docker Compose
       run: |
         docker compose up -d --build
-        docker compose exec -T postgres make test
-    
+        
+        # Wait for PostgreSQL to be ready
+        sleep 10
+
+        docker compose exec postgres make installcheck
     - name: Cleanup
       if: always()
       run: docker compose down 
