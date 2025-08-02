@@ -1,6 +1,6 @@
 # pghashlib - high performance hash functions for PostgreSQL
 
-A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, and lookup2 algorithms.
+A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, lookup2, and lookup3be algorithms.
 
 ## Table of Contents
 
@@ -22,6 +22,7 @@ A PostgreSQL extension providing high-performance hash functions for data proces
    - [cityhash64](#cityhash64)
    - [cityhash128](#cityhash128)
    - [lookup2](#lookup2)
+   - [lookup3be](#lookup3be)
    - [Common Use Cases](#common-use-cases)
      - [Data Partitioning](#data-partitioning)
      - [Sampling](#sampling)
@@ -127,6 +128,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 - **CityHash64**: High-performance 64-bit hash function from Google
 - **CityHash128**: High-performance 128-bit hash function from Google
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
+- **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
 - **Multiple Input Types**: Supports `text`, `bytea`, and `integer` inputs
 - **Custom Seed Support**: Optional seed parameter for hash customization
 - **High Performance**: Optimized C implementation
@@ -141,6 +143,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 | `cityhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit CityHash - high-performance hash by Google |
 | `cityhash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit CityHash - returns array of two 64-bit values |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
+| `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 
 ## Usage
 
@@ -382,6 +385,53 @@ SELECT lookup2(12345, 42);
 
 </details>
 
+### lookup3be
+
+lookup3be is Bob Jenkins' lookup3 hash function with big-endian byte order, an improved version of lookup2 with better mixing and avalanche properties.
+
+**Signatures:**
+- `lookup3be(text)` → `integer`
+- `lookup3be(text, integer)` → `integer`
+- `lookup3be(bytea)` → `integer`
+- `lookup3be(bytea, integer)` → `integer`
+- `lookup3be(integer)` → `integer`
+- `lookup3be(integer, integer)` → `integer`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Initial value/seed (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default initval (0)
+SELECT lookup3be('hello world');
+-- Result: lookup3be hash of text
+
+-- Hash text with custom initval
+SELECT lookup3be('hello world', 42);
+-- Result: lookup3be hash with custom initval
+
+-- Hash bytea data
+SELECT lookup3be('hello world'::bytea);
+-- Result: lookup3be hash of bytea data
+
+-- Hash bytea with custom initval
+SELECT lookup3be('hello world'::bytea, 42);
+-- Result: lookup3be hash with custom initval
+
+-- Hash integer values
+SELECT lookup3be(12345);
+-- Result: lookup3be hash of integer
+
+-- Hash integer with custom initval
+SELECT lookup3be(12345, 42);
+-- Result: lookup3be hash with custom initval
+```
+
+</details>
+
 ### Common Use Cases
 
 #### Data Partitioning
@@ -484,6 +534,6 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 
 - MurmurHash3 algorithm by Austin Appleby
 - CityHash algorithm by Google Inc.
-- lookup2 algorithm by Bob Jenkins
+- lookup2 and lookup3be algorithms by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support
