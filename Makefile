@@ -1,7 +1,7 @@
 EXTENSION = hashlib
 MODULE_big = hashlib
 DATA = sql/hashlib--0.0.1.sql
-OBJS = src/murmur.o src/crc32.o src/cityhash.o
+OBJS = $(patsubst src/%.c,src/%.o,$(wildcard src/*.c))
 PG_CONFIG = pg_config
 
 # PGXN variables
