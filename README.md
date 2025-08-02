@@ -1,6 +1,6 @@
 # PostgreSQL Hash Library (hashlib)
 
-A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, and CityHash128 algorithms.
+A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, and lookup2 algorithms.
 
 ## Table of Contents
 
@@ -21,6 +21,7 @@ A PostgreSQL extension providing high-performance hash functions for data proces
    - [crc32](#crc32)
    - [cityhash64](#cityhash64)
    - [cityhash128](#cityhash128)
+   - [lookup2](#lookup2)
    - [Common Use Cases](#common-use-cases)
      - [Data Partitioning](#data-partitioning)
      - [Sampling](#sampling)
@@ -125,6 +126,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 - **CRC32**: Cyclic redundancy check algorithm for error detection
 - **CityHash64**: High-performance 64-bit hash function from Google
 - **CityHash128**: High-performance 128-bit hash function from Google
+- **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **Multiple Input Types**: Supports `text`, `bytea`, and `integer` inputs
 - **Custom Seed Support**: Optional seed parameter for hash customization
 - **High Performance**: Optimized C implementation
@@ -138,6 +140,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 | `crc32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit CRC32 - cyclic redundancy check hash |
 | `cityhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit CityHash - high-performance hash by Google |
 | `cityhash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit CityHash - returns array of two 64-bit values |
+| `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 
 ## Usage
 
@@ -332,6 +335,53 @@ SELECT
 
 </details>
 
+### lookup2
+
+lookup2 is Bob Jenkins' hash function, designed for fast hashing with good distribution properties.
+
+**Signatures:**
+- `lookup2(text)` → `integer`
+- `lookup2(text, integer)` → `integer`
+- `lookup2(bytea)` → `integer`
+- `lookup2(bytea, integer)` → `integer`
+- `lookup2(integer)` → `integer`
+- `lookup2(integer, integer)` → `integer`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Initial value/seed (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default initval (0)
+SELECT lookup2('hello world');
+-- Result: lookup2 hash of text
+
+-- Hash text with custom initval
+SELECT lookup2('hello world', 42);
+-- Result: lookup2 hash with custom initval
+
+-- Hash bytea data
+SELECT lookup2('hello world'::bytea);
+-- Result: lookup2 hash of bytea data
+
+-- Hash bytea with custom initval
+SELECT lookup2('hello world'::bytea, 42);
+-- Result: lookup2 hash with custom initval
+
+-- Hash integer values
+SELECT lookup2(12345);
+-- Result: lookup2 hash of integer
+
+-- Hash integer with custom initval
+SELECT lookup2(12345, 42);
+-- Result: lookup2 hash with custom initval
+```
+
+</details>
+
 ### Common Use Cases
 
 #### Data Partitioning
@@ -434,5 +484,6 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 
 - MurmurHash3 algorithm by Austin Appleby
 - CityHash algorithm by Google Inc.
+- lookup2 algorithm by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support
