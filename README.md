@@ -424,20 +424,7 @@ FROM users;
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information on:
-
-- Development setup and guidelines
-- Adding new hash functions
-- Testing procedures
-- Distribution and packaging
-- Code style requirements
-
-Quick start for contributors:
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information on development setup, testing, and contribution guidelines.
 
 ## License
 
