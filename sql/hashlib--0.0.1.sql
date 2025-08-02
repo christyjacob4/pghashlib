@@ -180,3 +180,39 @@ CREATE OR REPLACE FUNCTION lookup2(integer, integer)
 RETURNS integer
 AS 'MODULE_PATHNAME', 'lookup2_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup3le function for text (default initval = 0)
+CREATE OR REPLACE FUNCTION lookup3le(text)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup3le_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup3le function for text with custom initval
+CREATE OR REPLACE FUNCTION lookup3le(text, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup3le_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup3le function for bytea (default initval = 0)
+CREATE OR REPLACE FUNCTION lookup3le(bytea)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup3le_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup3le function for bytea with custom initval
+CREATE OR REPLACE FUNCTION lookup3le(bytea, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup3le_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup3le function for integer (default initval = 0)
+CREATE OR REPLACE FUNCTION lookup3le(integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup3le_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- lookup3le function for integer with custom initval
+CREATE OR REPLACE FUNCTION lookup3le(integer, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'lookup3le_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
