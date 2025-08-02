@@ -4,6 +4,7 @@
 #include "mb/pg_wchar.h"
 #include "access/htup_details.h"
 #include "utils/array.h"
+#include "catalog/pg_type.h"
 
 /* CityHash128 constants */
 static const uint64_t k0 = 0xc3a5c85c97cb3127ULL;
@@ -140,10 +141,9 @@ HashLen17to32_128(const char *s, size_t len)
 static uint128_t
 HashLen33to64_128(const char *s, size_t len)
 {
-    uint64_t mul, a, b, c, d, e, f, u, v;
+    uint64_t mul, a, c, d, e, f, u, v;
     mul = k2 + len * 2;
     a = Fetch64(s) * k2;
-    b = Fetch64(s + 8);
     c = Fetch64(s + len - 8) * mul;
     d = Fetch64(s + len - 16) * k2;
     e = Fetch64(s + 16) * mul;
