@@ -140,14 +140,13 @@ HashLen17to32_128(const char *s, size_t len)
 static uint128_t
 HashLen33to64_128(const char *s, size_t len)
 {
-    uint64_t mul, a, b, c, d, y, z, e, f, u, v;
+    uint64_t mul, a, b, c, d, y, e, f, u, v;
     mul = k2 + len * 2;
     a = Fetch64(s) * k2;
     b = Fetch64(s + 8);
     c = Fetch64(s + len - 8) * mul;
     d = Fetch64(s + len - 16) * k2;
     y = Rotate(a + b, 43) + Rotate(c, 30) + d;
-    z = HashLen16(y, a + Rotate(b + k2, 18) + c);
     e = Fetch64(s + 16) * mul;
     f = Fetch64(s + 24);
     u = Rotate(e, 43) + Rotate(f, 30) + c;
@@ -284,17 +283,16 @@ cityhash128_text_seed(PG_FUNCTION_ARGS)
     int64_t seed_high = PG_GETARG_INT64(2);
     char *data = VARDATA_ANY(input);
     int len = VARSIZE_ANY_EXHDR(input);
-    
     uint128_t seed, hash;
-    seed.low = (uint64_t)seed_low;
-    seed.high = (uint64_t)seed_high;
-    
-    hash = cityhash128_with_seed(data, len, seed);
-    
     Datum elems[2];
     ArrayType *result;
     int dims[1];
     int lbs[1];
+    
+    seed.low = (uint64_t)seed_low;
+    seed.high = (uint64_t)seed_high;
+    
+    hash = cityhash128_with_seed(data, len, seed);
     
     elems[0] = Int64GetDatum((int64_t)hash.low);
     elems[1] = Int64GetDatum((int64_t)hash.high);
@@ -347,17 +345,16 @@ cityhash128_bytea_seed(PG_FUNCTION_ARGS)
     int64_t seed_high = PG_GETARG_INT64(2);
     char *data = VARDATA_ANY(input);
     int len = VARSIZE_ANY_EXHDR(input);
-    
     uint128_t seed, hash;
-    seed.low = (uint64_t)seed_low;
-    seed.high = (uint64_t)seed_high;
-    
-    hash = cityhash128_with_seed(data, len, seed);
-    
     Datum elems[2];
     ArrayType *result;
     int dims[1];
     int lbs[1];
+    
+    seed.low = (uint64_t)seed_low;
+    seed.high = (uint64_t)seed_high;
+    
+    hash = cityhash128_with_seed(data, len, seed);
     
     elems[0] = Int64GetDatum((int64_t)hash.low);
     elems[1] = Int64GetDatum((int64_t)hash.high);
@@ -406,17 +403,16 @@ cityhash128_int_seed(PG_FUNCTION_ARGS)
     int32_t input = PG_GETARG_INT32(0);
     int64_t seed_low = PG_GETARG_INT64(1);
     int64_t seed_high = PG_GETARG_INT64(2);
-    
     uint128_t seed, hash;
-    seed.low = (uint64_t)seed_low;
-    seed.high = (uint64_t)seed_high;
-    
-    hash = cityhash128_with_seed((const char *)&input, sizeof(int32_t), seed);
-    
     Datum elems[2];
     ArrayType *result;
     int dims[1];
     int lbs[1];
+    
+    seed.low = (uint64_t)seed_low;
+    seed.high = (uint64_t)seed_high;
+    
+    hash = cityhash128_with_seed((const char *)&input, sizeof(int32_t), seed);
     
     elems[0] = Int64GetDatum((int64_t)hash.low);
     elems[1] = Int64GetDatum((int64_t)hash.high);
