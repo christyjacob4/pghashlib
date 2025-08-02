@@ -1,4 +1,4 @@
-# PostgreSQL Hash Library (hashlib)
+# pghashlib - high performance hash functions for PostgreSQL
 
 A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, and lookup2 algorithms.
 

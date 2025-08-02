@@ -1,0 +1,115 @@
+-- Test basic hash functionality with text
+SELECT lookup2('hello world');
+  lookup2  
+-----------
+ 447289830
+(1 row)
+
+-- Test hash with different text inputs
+SELECT lookup2('test string');
+  lookup2   
+------------
+ 1538088394
+(1 row)
+
+SELECT lookup2('another test');
+  lookup2   
+------------
+ 1074141746
+(1 row)
+
+-- Test text input with custom initval
+SELECT lookup2('hello world', 42);
+   lookup2   
+-------------
+ -1287150784
+(1 row)
+
+SELECT lookup2('hello world', 123);
+   lookup2   
+-------------
+ -1013821216
+(1 row)
+
+-- Test bytea input
+SELECT lookup2('hello world'::bytea);
+  lookup2  
+-----------
+ 447289830
+(1 row)
+
+-- Test bytea input with custom initval
+SELECT lookup2('hello world'::bytea, 42);
+   lookup2   
+-------------
+ -1287150784
+(1 row)
+
+-- Test integer input
+SELECT lookup2(12345);
+   lookup2   
+-------------
+ -1902978736
+(1 row)
+
+SELECT lookup2(-12345);
+  lookup2   
+------------
+ 1886942764
+(1 row)
+
+-- Test integer input with custom initval
+SELECT lookup2(12345, 42);
+  lookup2   
+------------
+ 1668431274
+(1 row)
+
+SELECT lookup2(-12345, 123);
+  lookup2   
+------------
+ 2032930975
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT lookup2('consistent test') = lookup2('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test initval effect (same input, different initvals should give different hashes)
+SELECT lookup2('initval test', 1) != lookup2('initval test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'lookup2'
+ORDER BY proname, proargtypes;
+ proname | provolatile | proisstrict 
+---------+-------------+-------------
+ lookup2 | i           | t
+ lookup2 | i           | t
+ lookup2 | i           | t
+ lookup2 | i           | t
+ lookup2 | i           | t
+ lookup2 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
