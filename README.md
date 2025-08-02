@@ -1,6 +1,6 @@
 # PostgreSQL Hash Library (hashlib)
 
-A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, and CityHash64 algorithms.
+A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, and CityHash128 algorithms.
 
 ## Table of Contents
 
@@ -114,6 +114,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 | `murmurhash3_32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit MurmurHash3 - fast, non-cryptographic hash |
 | `crc32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit CRC32 - cyclic redundancy check hash |
 | `cityhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit CityHash - high-performance hash by Google |
+| `cityhash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit CityHash - returns array of two 64-bit values |
 
 ## Function Documentation
 
@@ -194,6 +195,7 @@ SELECT cityhash64(12345);                      -- CityHash64 of integer
 - **MurmurHash3**: Fast, non-cryptographic hash function
 - **CRC32**: Cyclic redundancy check algorithm for error detection
 - **CityHash64**: High-performance 64-bit hash function from Google
+- **CityHash128**: High-performance 128-bit hash function from Google
 - **Multiple Input Types**: Supports `text`, `bytea`, and `integer` inputs
 - **Custom Seed Support**: Optional seed parameter for hash customization
 - **High Performance**: Optimized C implementation
@@ -261,6 +263,81 @@ SELECT cityhash64(12345, 42);
 -- Result: 17692749115209691159
 ```
 
+### CityHash128 Functions
+
+The extension provides the `cityhash128` function with multiple overloads:
+
+```sql
+-- Hash text with default seed
+SELECT cityhash128('hello world');
+-- Result: {-7119421456246056744,-4082676536336963091}
+
+-- Hash text with custom seed (two 64-bit values)
+SELECT cityhash128('hello world', 42, 84);
+-- Result: {4409783961438234325,7356734009537733524}
+
+-- Hash bytea data
+SELECT cityhash128('hello world'::bytea);
+-- Result: {-7119421456246056744,-4082676536336963091}
+
+-- Hash bytea with custom seed
+SELECT cityhash128('hello world'::bytea, 42, 84);
+-- Result: {4409783961438234325,7356734009537733524}
+
+-- Hash integer values
+SELECT cityhash128(12345);
+-- Result: {-8264812632162517731,-9113745412911669670}
+
+-- Hash integer with custom seed
+SELECT cityhash128(12345, 42, 84);
+-- Result: {-4383119689242713753,-6416156085369945475}
+
+-- Access individual parts of the 128-bit hash
+SELECT 
+    (cityhash128('hello world'))[1] AS low_64_bits,
+    (cityhash128('hello world'))[2] AS high_64_bits;
+```
+
+### cityhash128
+
+CityHash128 is a 128-bit hash function from Google, providing stronger hash distribution than the 64-bit version.
+
+**Signatures:**
+- `cityhash128(text)` → `bigint[]`
+- `cityhash128(text, bigint, bigint)` → `bigint[]`
+- `cityhash128(bytea)` → `bigint[]`
+- `cityhash128(bytea, bigint, bigint)` → `bigint[]`
+- `cityhash128(integer)` → `bigint[]`
+- `cityhash128(integer, bigint, bigint)` → `bigint[]`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Low 64-bit seed value
+- Third parameter (optional): High 64-bit seed value
+
+**Return Value:**
+Returns an array of two `bigint` values representing the 128-bit hash:
+- `[1]`: Low 64 bits of the hash
+- `[2]`: High 64 bits of the hash
+
+**Examples:**
+```sql
+SELECT cityhash128('hello world');
+-- Result: {-7119421456246056744,-4082676536336963091}
+
+SELECT cityhash128('hello world', 42, 84);
+-- Result: {4409783961438234325,7356734009537733524}
+
+SELECT cityhash128('hello'::bytea);
+-- Result: CityHash128 of bytea data
+
+SELECT cityhash128(12345);
+-- Result: {-8264812632162517731,-9113745412911669670}
+
+-- Access individual parts of the hash
+SELECT (cityhash128('data'))[1] AS low_part, (cityhash128('data'))[2] AS high_part;
+```
+
 ### Common Use Cases
 
 #### Data Partitioning
@@ -278,6 +355,13 @@ SELECT
     data,
     abs(cityhash64(id::text)) % 16 as partition_key
 FROM my_table;
+
+-- Use CityHash128 for even better distribution across many partitions
+SELECT 
+    id,
+    data,
+    abs((cityhash128(id::text))[1]) % 1024 as partition_key
+FROM my_table;
 ```
 
 #### Sampling
@@ -292,6 +376,12 @@ WHERE murmurhash3_32(id::text) % 100 < 10;
 -- Create hash-based fingerprint for deduplication
 SELECT 
     murmurhash3_32(column1 || column2 || column3) as fingerprint,
+    *
+FROM data_table;
+
+-- Use CityHash128 for stronger deduplication fingerprints
+SELECT 
+    cityhash128(column1 || column2 || column3) as strong_fingerprint,
     *
 FROM data_table;
 ```
@@ -447,6 +537,7 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 ## Roadmap
 
 - [x] Add CityHash64 implementation
+- [x] Add CityHash128 implementation
 - [ ] Add SHA-256 hash function
 - [ ] Add Blake3 hash function
 - [ ] Performance optimizations for large data
