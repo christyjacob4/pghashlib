@@ -108,3 +108,39 @@ CREATE OR REPLACE FUNCTION cityhash64(integer, bigint)
 RETURNS bigint
 AS 'MODULE_PATHNAME', 'cityhash64_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash128 function for text (default seed) - returns array of two bigints
+CREATE OR REPLACE FUNCTION cityhash128(text)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'cityhash128_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash128 function for text with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION cityhash128(text, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'cityhash128_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash128 function for bytea (default seed) - returns array of two bigints
+CREATE OR REPLACE FUNCTION cityhash128(bytea)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'cityhash128_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash128 function for bytea with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION cityhash128(bytea, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'cityhash128_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash128 function for integer (default seed) - returns array of two bigints
+CREATE OR REPLACE FUNCTION cityhash128(integer)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'cityhash128_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash128 function for integer with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION cityhash128(integer, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'cityhash128_int_seed'
+LANGUAGE C IMMUTABLE STRICT;

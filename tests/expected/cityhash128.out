@@ -1,0 +1,130 @@
+-- Test basic hash functionality with text
+SELECT cityhash128('hello world');
+                 cityhash128                 
+---------------------------------------------
+ {-7119421456246056744,-4082676536336963091}
+(1 row)
+
+-- Test hash with different text inputs
+SELECT cityhash128('test string');
+                cityhash128                 
+--------------------------------------------
+ {-8464733707811276695,6610537383817721229}
+(1 row)
+
+SELECT cityhash128('another test');
+                cityhash128                 
+--------------------------------------------
+ {5378404561817064929,-2351797155633923599}
+(1 row)
+
+-- Test text input with custom seed
+SELECT cityhash128('hello world', 42, 84);
+                cityhash128                
+-------------------------------------------
+ {4409783961438234325,7356734009537733524}
+(1 row)
+
+SELECT cityhash128('hello world', 123, 246);
+                cityhash128                
+-------------------------------------------
+ {6857659616824648353,2424533623034858378}
+(1 row)
+
+-- Test bytea input
+SELECT cityhash128('hello world'::bytea);
+                 cityhash128                 
+---------------------------------------------
+ {-7119421456246056744,-4082676536336963091}
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT cityhash128('hello world'::bytea, 42, 84);
+                cityhash128                
+-------------------------------------------
+ {4409783961438234325,7356734009537733524}
+(1 row)
+
+-- Test integer input
+SELECT cityhash128(12345);
+                 cityhash128                 
+---------------------------------------------
+ {-8264812632162517731,-9113745412911669670}
+(1 row)
+
+SELECT cityhash128(-12345);
+                 cityhash128                 
+---------------------------------------------
+ {-3823043242225591632,-4475377033677136913}
+(1 row)
+
+-- Test integer input with custom seed
+SELECT cityhash128(12345, 42, 84);
+                 cityhash128                 
+---------------------------------------------
+ {-4383119689242713753,-6416156085369945475}
+(1 row)
+
+SELECT cityhash128(-12345, 123, 246);
+                cityhash128                 
+--------------------------------------------
+ {-5423200634581329246,4739740220331422061}
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT cityhash128('consistent test') = cityhash128('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT cityhash128('seed test', 1, 2) != cityhash128('seed test', 3, 4);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test that results are arrays with exactly 2 elements
+SELECT array_length(cityhash128('test'), 1);
+ array_length 
+--------------
+            2
+(1 row)
+
+-- Test accessing individual elements of the hash
+SELECT (cityhash128('hash parts'))[1] AS low_part, (cityhash128('hash parts'))[2] AS high_part;
+       low_part       |      high_part       
+----------------------+----------------------
+ -2772195440389657064 | -8902949377860387020
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'cityhash128'
+ORDER BY proname, proargtypes;
+   proname   | provolatile | proisstrict 
+-------------+-------------+-------------
+ cityhash128 | i           | t
+ cityhash128 | i           | t
+ cityhash128 | i           | t
+ cityhash128 | i           | t
+ cityhash128 | i           | t
+ cityhash128 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
