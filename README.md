@@ -1,10 +1,85 @@
 # PostgreSQL Hash Library (hashlib)
 
-A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, with plans to add more hash algorithms.
+A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3 and CRC32 algorithms.
+
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Available Functions](#available-functions)
+3. [Function Documentation](#function-documentation)
+4. [Features](#features)
+5. [Usage](#usage)
+6. [Distribution and Packaging](#distribution-and-packaging)
+7. [Development](#development)
+8. [Compatibility](#compatibility)
+9. [Performance](#performance)
+10. [Contributing](#contributing)
+11. [License](#license)
+12. [Roadmap](#roadmap)
+13. [Support](#support)
+14. [Acknowledgments](#acknowledgments)
+
+## Available Functions
+
+| Function | Input Types | Optional Seed | Return Type | Description |
+|----------|-------------|---------------|-------------|-------------|
+| `murmurhash3_32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit MurmurHash3 - fast, non-cryptographic hash |
+| `crc32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit CRC32 - cyclic redundancy check hash |
+
+## Function Documentation
+
+### murmurhash3_32
+
+MurmurHash3 is a fast, non-cryptographic hash function suitable for general hash-based lookup.
+
+**Signatures:**
+- `murmurhash3_32(text)` → `integer`
+- `murmurhash3_32(text, integer)` → `integer` 
+- `murmurhash3_32(bytea)` → `integer`
+- `murmurhash3_32(bytea, integer)` → `integer`
+- `murmurhash3_32(integer)` → `integer`
+- `murmurhash3_32(integer, integer)` → `integer`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+**Examples:**
+```sql
+SELECT murmurhash3_32('hello world');           -- 1594632942
+SELECT murmurhash3_32('hello world', 42);       -- 2838467652
+SELECT murmurhash3_32('hello'::bytea);          -- Hash bytea data
+SELECT murmurhash3_32(12345);                   -- 2794345569
+```
+
+### crc32
+
+CRC32 is a cyclic redundancy check algorithm commonly used for error detection.
+
+**Signatures:**
+- `crc32(text)` → `integer`
+- `crc32(text, integer)` → `integer`
+- `crc32(bytea)` → `integer`
+- `crc32(bytea, integer)` → `integer`
+- `crc32(integer)` → `integer`
+- `crc32(integer, integer)` → `integer`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+**Examples:**
+```sql
+SELECT crc32('hello world');                    -- CRC32 of text
+SELECT crc32('hello world', 42);               -- CRC32 with custom seed
+SELECT crc32('hello'::bytea);                  -- CRC32 of bytea data
+SELECT crc32(12345);                           -- CRC32 of integer
+```
 
 ## Features
 
 - **MurmurHash3**: Fast, non-cryptographic hash function
+- **CRC32**: Cyclic redundancy check algorithm for error detection
 - **Multiple Input Types**: Supports `text`, `bytea`, and `integer` inputs
 - **Custom Seed Support**: Optional seed parameter for hash customization
 - **High Performance**: Optimized C implementation
