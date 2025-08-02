@@ -1,6 +1,6 @@
-# pghashlib - high performance hash functions for PostgreSQL
+# pghashlib
 
-A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, lookup2, and lookup3be algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -23,6 +23,7 @@ A PostgreSQL extension providing high-performance hash functions for data proces
    - [cityhash128](#cityhash128)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
+   - [lookup3le](#lookup3le)
    - [Common Use Cases](#common-use-cases)
      - [Data Partitioning](#data-partitioning)
      - [Sampling](#sampling)
@@ -129,6 +130,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 - **CityHash128**: High-performance 128-bit hash function from Google
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
+- **lookup3le**: Bob Jenkins' lookup3 hash function with little-endian byte order - optimized for Intel/AMD systems
 - **Multiple Input Types**: Supports `text`, `bytea`, and `integer` inputs
 - **Custom Seed Support**: Optional seed parameter for hash customization
 - **High Performance**: Optimized C implementation
@@ -144,6 +146,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 | `cityhash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit CityHash - returns array of two 64-bit values |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
+| `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
 
 ## Usage
 
@@ -428,6 +431,53 @@ SELECT lookup3be(12345);
 -- Hash integer with custom initval
 SELECT lookup3be(12345, 42);
 -- Result: lookup3be hash with custom initval
+```
+
+</details>
+
+### lookup3le
+
+lookup3le is Bob Jenkins' lookup3 hash function with little-endian byte order, optimized for Intel/AMD processors and other little-endian systems for maximum performance.
+
+**Signatures:**
+- `lookup3le(text)` → `integer`
+- `lookup3le(text, integer)` → `integer`
+- `lookup3le(bytea)` → `integer`
+- `lookup3le(bytea, integer)` → `integer`
+- `lookup3le(integer)` → `integer`
+- `lookup3le(integer, integer)` → `integer`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Initial value/seed (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default initval (0)
+SELECT lookup3le('hello world');
+-- Result: lookup3le hash of text
+
+-- Hash text with custom initval
+SELECT lookup3le('hello world', 42);
+-- Result: lookup3le hash with custom initval
+
+-- Hash bytea data
+SELECT lookup3le('hello world'::bytea);
+-- Result: lookup3le hash of bytea data
+
+-- Hash bytea with custom initval
+SELECT lookup3le('hello world'::bytea, 42);
+-- Result: lookup3le hash with custom initval
+
+-- Hash integer values
+SELECT lookup3le(12345);
+-- Result: lookup3le hash of integer
+
+-- Hash integer with custom initval
+SELECT lookup3le(12345, 42);
+-- Result: lookup3le hash with custom initval
 ```
 
 </details>
