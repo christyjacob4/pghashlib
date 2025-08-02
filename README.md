@@ -5,15 +5,12 @@ A PostgreSQL extension providing high-performance hash functions for data proces
 ## Table of Contents
 
 1. [Installation](#installation)
-   - [Prerequisites](#prerequisites)
-   - [From Source (Recommended)](#from-source-recommended)
-   - [From Release Package](#from-release-package)
-   - [Using Docker (Development)](#using-docker-development)
-   - [Platform-Specific Instructions](#platform-specific-instructions)
-     - [Ubuntu/Debian](#ubuntudebian)
-     - [CentOS/RHEL/Fedora](#centosrhelfedora)
-     - [macOS with Homebrew](#macos-with-homebrew)
-     - [Custom PostgreSQL Installation](#custom-postgresql-installation)
+   - [Linux and Mac](#linux-and-mac)
+   - [Windows](#windows)
+   - [Installation Notes - Linux and Mac](#installation-notes---linux-and-mac)
+   - [Installation Notes - Windows](#installation-notes---windows)
+   - [Docker](#docker)
+   - [Enable Extension](#enable-extension)
 2. [Features](#features)
 3. [Supported Functions](#supported-functions)
 4. [Usage](#usage)
@@ -35,90 +32,86 @@ A PostgreSQL extension providing high-performance hash functions for data proces
 
 ## Installation
 
-### Prerequisites
+### Linux and Mac
 
-- PostgreSQL 12 or later
-- PostgreSQL development headers (`postgresql-server-dev` package)
-- GCC or compatible C compiler
-- Make
+Compile and install the extension (supports PostgreSQL 12+):
 
-### From Source (Recommended)
+```sh
+cd /tmp
+git clone https://github.com/christyjacob4/pghashlib.git
+cd pghashlib
+make
+make install # may need sudo
+```
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/pghashlib.git
-   cd pghashlib
-   ```
+See the [installation notes](#installation-notes---linux-and-mac) if you run into issues.
 
-2. **Build and install:**
-   ```bash
-   make
-   sudo make install
-   ```
+You can also install it with [Docker](#docker).
 
-3. **Run tests (optional but recommended):**
-   ```bash
-   make installcheck
-   ```
+### Windows
 
-4. **Enable the extension in your database:**
-   ```sql
-   CREATE EXTENSION hashlib;
-   ```
+Ensure [C++ support in Visual Studio](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170#download-and-install-the-tools) is installed and run `x64 Native Tools Command Prompt for VS [version]` as administrator. Then use `nmake` to build:
 
-### From Release Package
+```cmd
+set "PGROOT=C:\Program Files\PostgreSQL\17"
+cd %TEMP%
+git clone https://github.com/christyjacob4/pghashlib.git
+cd pghashlib
+# Note: Windows build requires additional setup - see installation notes
+make
+make install
+```
 
-1. **Download the latest release:**
-   ```bash
-   wget https://github.com/yourusername/pghashlib/releases/download/v0.1.0/hashlib-0.1.0.tar.gz
-   tar -xzf hashlib-0.1.0.tar.gz
-   cd hashlib-0.1.0
-   ```
+See the [installation notes](#installation-notes---windows) if you run into issues.
 
-2. **Follow steps 2-4 from above**
+You can also install it with [Docker](#docker).
 
-### Using Docker (Development)
+## Installation Notes - Linux and Mac
+
+Make sure you have the PostgreSQL development headers installed:
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install postgresql-server-dev-all
+```
+
+**CentOS/RHEL/Fedora:**
+```bash
+sudo yum install postgresql-devel
+# or for newer versions:
+sudo dnf install postgresql-devel
+```
+
+**macOS with Homebrew:**
+```bash
+brew install postgresql
+```
+
+**Custom PostgreSQL Installation:**
+
+If PostgreSQL is installed in a non-standard location:
+```bash
+make PG_CONFIG=/path/to/pg_config
+sudo make install PG_CONFIG=/path/to/pg_config
+```
+
+## Installation Notes - Windows
+
+Windows support requires additional setup. The extension has been tested on WSL (Windows Subsystem for Linux) - follow the Linux instructions within your WSL environment.
+
+## Docker
 
 ```bash
 docker compose up -d --build
 docker compose exec postgres psql -U postgres -c "CREATE EXTENSION hashlib;"
 ```
 
-### Platform-Specific Instructions
+## Enable Extension
 
-#### Ubuntu/Debian
-```bash
-# Install PostgreSQL development headers
-sudo apt-get install postgresql-server-dev-all
+After installation, enable the extension in your database:
 
-# Then follow "From Source" instructions
-```
-
-#### CentOS/RHEL/Fedora
-```bash
-# Install PostgreSQL development headers
-sudo yum install postgresql-devel
-# or for newer versions:
-sudo dnf install postgresql-devel
-
-# Then follow "From Source" instructions
-```
-
-#### macOS with Homebrew
-```bash
-# Install PostgreSQL
-brew install postgresql
-
-# Then follow "From Source" instructions
-```
-
-#### Custom PostgreSQL Installation
-
-If PostgreSQL is installed in a non-standard location:
-
-```bash
-make PG_CONFIG=/path/to/pg_config
-sudo make install PG_CONFIG=/path/to/pg_config
+```sql
+CREATE EXTENSION hashlib;
 ```
 
 ## Features
