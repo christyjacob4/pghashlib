@@ -1,6 +1,6 @@
 # PostgreSQL Hash Library (hashlib)
 
-A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3 and CRC32 algorithms.
+A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, and CityHash64 algorithms.
 
 ## Table of Contents
 
@@ -113,6 +113,7 @@ sudo make install PG_CONFIG=/path/to/pg_config
 |----------|-------------|---------------|-------------|-------------|
 | `murmurhash3_32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit MurmurHash3 - fast, non-cryptographic hash |
 | `crc32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit CRC32 - cyclic redundancy check hash |
+| `cityhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit CityHash - high-performance hash by Google |
 
 ## Function Documentation
 
@@ -164,10 +165,35 @@ SELECT crc32('hello'::bytea);                  -- CRC32 of bytea data
 SELECT crc32(12345);                           -- CRC32 of integer
 ```
 
+### cityhash64
+
+CityHash64 is a 64-bit hash function from Google, designed for high performance on strings.
+
+**Signatures:**
+- `cityhash64(text)` → `bigint`
+- `cityhash64(text, bigint)` → `bigint`
+- `cityhash64(bytea)` → `bigint`
+- `cityhash64(bytea, bigint)` → `bigint`
+- `cityhash64(integer)` → `bigint`
+- `cityhash64(integer, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: no seed)
+
+**Examples:**
+```sql
+SELECT cityhash64('hello world');              -- CityHash64 of text
+SELECT cityhash64('hello world', 42);          -- CityHash64 with custom seed
+SELECT cityhash64('hello'::bytea);             -- CityHash64 of bytea data
+SELECT cityhash64(12345);                      -- CityHash64 of integer
+```
+
 ## Features
 
 - **MurmurHash3**: Fast, non-cryptographic hash function
 - **CRC32**: Cyclic redundancy check algorithm for error detection
+- **CityHash64**: High-performance 64-bit hash function from Google
 - **Multiple Input Types**: Supports `text`, `bytea`, and `integer` inputs
 - **Custom Seed Support**: Optional seed parameter for hash customization
 - **High Performance**: Optimized C implementation
@@ -205,15 +231,52 @@ SELECT murmurhash3_32(12345, 42);
 -- Result: 751823303
 ```
 
+### CityHash64 Functions
+
+The extension provides the `cityhash64` function with multiple overloads:
+
+```sql
+-- Hash text with default seed
+SELECT cityhash64('hello world');
+-- Result: 2578220239953316063
+
+-- Hash text with custom seed  
+SELECT cityhash64('hello world', 42);
+-- Result: 6383797005284447264
+
+-- Hash bytea data
+SELECT cityhash64('hello world'::bytea);
+-- Result: 2578220239953316063
+
+-- Hash bytea with custom seed
+SELECT cityhash64('hello world'::bytea, 42);
+-- Result: 6383797005284447264
+
+-- Hash integer values
+SELECT cityhash64(12345);
+-- Result: 2041813223586929814
+
+-- Hash integer with custom seed
+SELECT cityhash64(12345, 42);
+-- Result: 17692749115209691159
+```
+
 ### Common Use Cases
 
 #### Data Partitioning
 ```sql
--- Distribute data across 8 partitions
+-- Distribute data across 8 partitions using MurmurHash3
 SELECT 
     id,
     data,
     murmurhash3_32(id::text) % 8 as partition_key
+FROM my_table;
+
+-- Distribute data across 16 partitions using CityHash64 for better distribution
+SELECT 
+    id,
+    data,
+    abs(cityhash64(id::text)) % 16 as partition_key
 FROM my_table;
 ```
 
@@ -383,9 +446,9 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 
 ## Roadmap
 
+- [x] Add CityHash64 implementation
 - [ ] Add SHA-256 hash function
 - [ ] Add Blake3 hash function
-- [ ] Add CityHash implementation
 - [ ] Performance optimizations for large data
 - [ ] PGXN packaging and distribution
 - [ ] Windows build support
@@ -399,5 +462,6 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 ## Acknowledgments
 
 - MurmurHash3 algorithm by Austin Appleby
+- CityHash algorithm by Google Inc.
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support 

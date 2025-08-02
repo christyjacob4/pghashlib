@@ -72,3 +72,39 @@ CREATE OR REPLACE FUNCTION crc32(integer, integer)
 RETURNS integer
 AS 'MODULE_PATHNAME', 'crc32_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash64 function for text (default seed)
+CREATE OR REPLACE FUNCTION cityhash64(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'cityhash64_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash64 function for text with custom seed
+CREATE OR REPLACE FUNCTION cityhash64(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'cityhash64_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash64 function for bytea (default seed)
+CREATE OR REPLACE FUNCTION cityhash64(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'cityhash64_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash64 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION cityhash64(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'cityhash64_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash64 function for integer (default seed)
+CREATE OR REPLACE FUNCTION cityhash64(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'cityhash64_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CityHash64 function for integer with custom seed
+CREATE OR REPLACE FUNCTION cityhash64(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'cityhash64_int_seed'
+LANGUAGE C IMMUTABLE STRICT;

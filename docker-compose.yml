@@ -7,7 +7,5 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
-    volumes:
-      - ./:/tmp/pghashlib
     ports:
       - "5432:5432"

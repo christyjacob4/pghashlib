@@ -1,0 +1,116 @@
+-- Test basic hash functionality with text
+SELECT cityhash64('hello world');
+     cityhash64      
+---------------------
+ 6381520714923946011
+(1 row)
+
+-- Test hash with different text inputs
+SELECT cityhash64('test string');
+     cityhash64      
+---------------------
+ 2823585066611369022
+(1 row)
+
+SELECT cityhash64('another test');
+     cityhash64      
+---------------------
+ 8697554947696916226
+(1 row)
+
+-- Test text input with custom seed
+SELECT cityhash64('hello world', 42);
+      cityhash64      
+----------------------
+ -6188978271564344566
+(1 row)
+
+SELECT cityhash64('hello world', 123);
+     cityhash64      
+---------------------
+ -780851750399816477
+(1 row)
+
+-- Test bytea input
+SELECT cityhash64('hello world'::bytea);
+     cityhash64      
+---------------------
+ 6381520714923946011
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT cityhash64('hello world'::bytea, 42);
+      cityhash64      
+----------------------
+ -6188978271564344566
+(1 row)
+
+-- Test integer input
+SELECT cityhash64(12345);
+     cityhash64      
+---------------------
+ 8183097863398318022
+(1 row)
+
+SELECT cityhash64(-12345);
+     cityhash64     
+--------------------
+ 939011627313479044
+(1 row)
+
+-- Test integer input with custom seed
+SELECT cityhash64(12345, 42);
+     cityhash64      
+---------------------
+ 3224075164624314078
+(1 row)
+
+SELECT cityhash64(-12345, 123);
+     cityhash64     
+--------------------
+ -89749675687517523
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT cityhash64('consistent test') = cityhash64('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT cityhash64('seed test', 1) != cityhash64('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'cityhash64'
+ORDER BY proname, proargtypes;
+  proname   | provolatile | proisstrict 
+------------+-------------+-------------
+ cityhash64 | i           | t
+ cityhash64 | i           | t
+ cityhash64 | i           | t
+ cityhash64 | i           | t
+ cityhash64 | i           | t
+ cityhash64 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
