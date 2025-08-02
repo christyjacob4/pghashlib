@@ -1,0 +1,116 @@
+-- Test basic hash functionality with text
+SELECT lookup3be('hello world');
+ lookup3be  
+------------
+ -942795449
+(1 row)
+
+-- Test hash with different text inputs
+SELECT lookup3be('test string');
+ lookup3be  
+------------
+ 1077573433
+(1 row)
+
+SELECT lookup3be('another test');
+  lookup3be  
+-------------
+ -2119669366
+(1 row)
+
+-- Test text input with custom initval
+SELECT lookup3be('hello world', 42);
+ lookup3be  
+------------
+ 1545643001
+(1 row)
+
+SELECT lookup3be('hello world', 123);
+ lookup3be  
+------------
+ 1709307537
+(1 row)
+
+-- Test bytea input
+SELECT lookup3be('hello world'::bytea);
+ lookup3be  
+------------
+ -942795449
+(1 row)
+
+-- Test bytea input with custom initval
+SELECT lookup3be('hello world'::bytea, 42);
+ lookup3be  
+------------
+ 1545643001
+(1 row)
+
+-- Test integer input
+SELECT lookup3be(12345);
+ lookup3be  
+------------
+ -185163110
+(1 row)
+
+SELECT lookup3be(-12345);
+  lookup3be  
+-------------
+ -1622048687
+(1 row)
+
+-- Test integer input with custom initval
+SELECT lookup3be(12345, 42);
+ lookup3be  
+------------
+ 1051714761
+(1 row)
+
+SELECT lookup3be(-12345, 123);
+ lookup3be  
+------------
+ 1268105482
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT lookup3be('consistent test') = lookup3be('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test initval effect (same input, different initvals should give different hashes)
+SELECT lookup3be('initval test', 1) != lookup3be('initval test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'lookup3be'
+ORDER BY proname, proargtypes;
+  proname  | provolatile | proisstrict 
+-----------+-------------+-------------
+ lookup3be | i           | t
+ lookup3be | i           | t
+ lookup3be | i           | t
+ lookup3be | i           | t
+ lookup3be | i           | t
+ lookup3be | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

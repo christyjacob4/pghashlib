@@ -1,7 +1,7 @@
 EXTENSION = hashlib
 MODULE_big = hashlib
 DATA = sql/hashlib--0.0.1.sql
-OBJS = src/cityhash64.o src/cityhash128.o src/crc32.o src/lookup2.o src/murmur.o
+OBJS = src/cityhash64.o src/cityhash128.o src/crc32.o src/lookup2.o src/lookup3be.o src/murmur.o
 PG_CONFIG = pg_config
 
 # PGXN variables
