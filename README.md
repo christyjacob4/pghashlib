@@ -584,6 +584,6 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 
 - MurmurHash3 algorithm by Austin Appleby
 - CityHash algorithm by Google Inc.
-- lookup2, lookup3be, and lookup3le algorithms by Bob Jenkins
+- lookup2 and lookup3be algorithms by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support
