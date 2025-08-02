@@ -140,13 +140,12 @@ HashLen17to32_128(const char *s, size_t len)
 static uint128_t
 HashLen33to64_128(const char *s, size_t len)
 {
-    uint64_t mul, a, b, c, d, y, e, f, u, v;
+    uint64_t mul, a, b, c, d, e, f, u, v;
     mul = k2 + len * 2;
     a = Fetch64(s) * k2;
     b = Fetch64(s + 8);
     c = Fetch64(s + len - 8) * mul;
     d = Fetch64(s + len - 16) * k2;
-    y = Rotate(a + b, 43) + Rotate(c, 30) + d;
     e = Fetch64(s + 16) * mul;
     f = Fetch64(s + 24);
     u = Rotate(e, 43) + Rotate(f, 30) + c;
