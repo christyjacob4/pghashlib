@@ -36,3 +36,39 @@ CREATE OR REPLACE FUNCTION murmurhash3_32(integer, integer)
 RETURNS integer
 AS 'MODULE_PATHNAME', 'murmurhash3_32_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- CRC32 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION crc32(text)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'crc32_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CRC32 function for text with custom seed
+CREATE OR REPLACE FUNCTION crc32(text, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'crc32_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CRC32 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION crc32(bytea)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'crc32_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CRC32 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION crc32(bytea, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'crc32_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CRC32 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION crc32(integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'crc32_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- CRC32 function for integer with custom seed
+CREATE OR REPLACE FUNCTION crc32(integer, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'crc32_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
