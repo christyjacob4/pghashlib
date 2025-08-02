@@ -48,8 +48,9 @@ static uint64_t
 HashLen16Mul(uint64_t u, uint64_t v, uint64_t mul)
 {
     uint64_t a = (u ^ v) * mul;
+    uint64_t b;
     a ^= (a >> 47);
-    uint64_t b = (v ^ a) * mul;
+    b = (v ^ a) * mul;
     b ^= (b >> 47);
     b *= mul;
     return b;
@@ -134,15 +135,18 @@ cityhash64_with_seed(const char *s, size_t len, uint64_t seed)
     }
     
     /* For strings over 64 bytes, we use a simplified version */
-    uint64_t x = seed;
-    uint64_t y = seed * k1 + 113;
-    uint64_t z = ShiftMix(y * k2 + 113) * k2;
-    uint64_t v_first = 0;
-    uint64_t v_second = 0;
-    uint64_t w_first = 0;
-    uint64_t w_second = 0;
-    const char *end = s + ((len - 1) / 64) * 64;
-    const char *last64 = end + ((len - 1) & 63) - 63;
+    uint64_t x, y, z, v_first, v_second, w_first, w_second, mul;
+    const char *end, *last64;
+    
+    x = seed;
+    y = seed * k1 + 113;
+    z = ShiftMix(y * k2 + 113) * k2;
+    v_first = 0;
+    v_second = 0;
+    w_first = 0;
+    w_second = 0;
+    end = s + ((len - 1) / 64) * 64;
+    last64 = end + ((len - 1) & 63) - 63;
     
     do {
         x = Rotate(x + y + v_first + Fetch64(s + 8), 37) * k1;
@@ -164,7 +168,7 @@ cityhash64_with_seed(const char *s, size_t len, uint64_t seed)
         s += 64;
     } while (s != end);
     
-    uint64_t mul = k1 + ((z & 0xff) << 1);
+    mul = k1 + ((z & 0xff) << 1);
     s = last64;
     w_first += ((len - 1) & 63);
     v_first += w_first;
