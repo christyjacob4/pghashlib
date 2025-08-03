@@ -1,0 +1,148 @@
+-- Test basic hash functionality with text
+SELECT highwayhash256('hello world');
+                                    highwayhash256                                    
+--------------------------------------------------------------------------------------
+ {-1730180435067276230,-3949562583220325914,-8175018380205084287,4467081750962237455}
+(1 row)
+
+-- Test hash with different text inputs
+SELECT highwayhash256('test string');
+                                   highwayhash256                                    
+-------------------------------------------------------------------------------------
+ {3858991136825594713,-2636551026385740561,-8175018380205084287,4467081750962237455}
+(1 row)
+
+SELECT highwayhash256('another test');
+                                   highwayhash256                                    
+-------------------------------------------------------------------------------------
+ {3801096836107472628,-1545063077951306913,-8172580620705552195,4238699032901035705}
+(1 row)
+
+-- Test text input with custom key (4 bigint values)
+SELECT highwayhash256('hello world', 1, 2, 3, 4);
+                                    highwayhash256                                    
+--------------------------------------------------------------------------------------
+ {-4953805049862479110,-2767360660977790659,-6676300237301038481,4855213622678204318}
+(1 row)
+
+SELECT highwayhash256('hello world', 42, 84, 168, 336);
+                                   highwayhash256                                    
+-------------------------------------------------------------------------------------
+ {8835603004757085333,-3603589079149553567,-7373579239990792827,6134616243185709516}
+(1 row)
+
+-- Test bytea input
+SELECT highwayhash256('hello world'::bytea);
+                                    highwayhash256                                    
+--------------------------------------------------------------------------------------
+ {-1730180435067276230,-3949562583220325914,-8175018380205084287,4467081750962237455}
+(1 row)
+
+-- Test bytea input with custom key
+SELECT highwayhash256('hello world'::bytea, 1, 2, 3, 4);
+                                    highwayhash256                                    
+--------------------------------------------------------------------------------------
+ {-4953805049862479110,-2767360660977790659,-6676300237301038481,4855213622678204318}
+(1 row)
+
+-- Test integer input
+SELECT highwayhash256(12345);
+                                   highwayhash256                                    
+-------------------------------------------------------------------------------------
+ {8857777780853903552,-2169319722197122402,-7947405037538532870,5435815990628376663}
+(1 row)
+
+SELECT highwayhash256(-12345);
+                                    highwayhash256                                    
+--------------------------------------------------------------------------------------
+ {-4076967497944337203,-2564921235915593642,-7947405037538532870,5435815990628376663}
+(1 row)
+
+-- Test integer input with custom key
+SELECT highwayhash256(12345, 1, 2, 3, 4);
+                                    highwayhash256                                    
+--------------------------------------------------------------------------------------
+ {-4259465054599662434,-4300662001544254925,-7416377129267376721,7462320350847369240}
+(1 row)
+
+SELECT highwayhash256(-12345, 42, 84, 168, 336);
+                                    highwayhash256                                    
+--------------------------------------------------------------------------------------
+ {-4564642586059109791,-4832600429236788342,-7038124027978908498,8425175342259426061}
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT highwayhash256('consistent test') = highwayhash256('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test key effect (same input, different keys should give different hashes)
+SELECT highwayhash256('key test', 1, 2, 3, 4) != highwayhash256('key test', 5, 6, 7, 8);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT highwayhash256('');
+                                   highwayhash256                                    
+-------------------------------------------------------------------------------------
+ {4237441290697061510,4239799407410372446,-5519670697284979940,-8684412929500817881}
+(1 row)
+
+-- Test single character
+SELECT highwayhash256('a');
+                                   highwayhash256                                    
+-------------------------------------------------------------------------------------
+ {-6811226016548761671,-675444791232094067,-7898651120030753058,4907017311289232543}
+(1 row)
+
+-- Test long string
+SELECT highwayhash256('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+                                   highwayhash256                                   
+------------------------------------------------------------------------------------
+ {8164782398116081581,3137452388839081006,-7331589830855910857,6016630088099183836}
+(1 row)
+
+-- Test array access (256-bit hash returns array of four bigints)
+SELECT 
+    (highwayhash256('hello world'))[1] AS first_64_bits,
+    (highwayhash256('hello world'))[2] AS second_64_bits,
+    (highwayhash256('hello world'))[3] AS third_64_bits,
+    (highwayhash256('hello world'))[4] AS fourth_64_bits;
+    first_64_bits     |    second_64_bits    |    third_64_bits     |   fourth_64_bits    
+----------------------+----------------------+----------------------+---------------------
+ -1730180435067276230 | -3949562583220325914 | -8175018380205084287 | 4467081750962237455
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'highwayhash256'
+ORDER BY proname, proargtypes;
+    proname     | provolatile | proisstrict 
+----------------+-------------+-------------
+ highwayhash256 | i           | t
+ highwayhash256 | i           | t
+ highwayhash256 | i           | t
+ highwayhash256 | i           | t
+ highwayhash256 | i           | t
+ highwayhash256 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

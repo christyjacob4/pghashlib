@@ -522,3 +522,111 @@ CREATE OR REPLACE FUNCTION farmhash64(integer, bigint, bigint)
 RETURNS bigint
 AS 'MODULE_PATHNAME', 'farmhash64_int_seeds'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash64 function for text (default key)
+CREATE OR REPLACE FUNCTION highwayhash64(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'highwayhash64_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash64 function for text with custom key (4 bigint values)
+CREATE OR REPLACE FUNCTION highwayhash64(text, bigint, bigint, bigint, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'highwayhash64_text_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash64 function for bytea (default key)
+CREATE OR REPLACE FUNCTION highwayhash64(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'highwayhash64_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash64 function for bytea with custom key (4 bigint values)
+CREATE OR REPLACE FUNCTION highwayhash64(bytea, bigint, bigint, bigint, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'highwayhash64_bytea_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash64 function for integer (default key)
+CREATE OR REPLACE FUNCTION highwayhash64(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'highwayhash64_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash64 function for integer with custom key (4 bigint values)
+CREATE OR REPLACE FUNCTION highwayhash64(integer, bigint, bigint, bigint, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'highwayhash64_int_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash128 function for text (default key) - returns array of two bigints
+CREATE OR REPLACE FUNCTION highwayhash128(text)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash128_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash128 function for text with custom key (4 bigint values) - returns array of two bigints
+CREATE OR REPLACE FUNCTION highwayhash128(text, bigint, bigint, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash128_text_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash128 function for bytea (default key) - returns array of two bigints
+CREATE OR REPLACE FUNCTION highwayhash128(bytea)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash128_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash128 function for bytea with custom key (4 bigint values) - returns array of two bigints
+CREATE OR REPLACE FUNCTION highwayhash128(bytea, bigint, bigint, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash128_bytea_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash128 function for integer (default key) - returns array of two bigints
+CREATE OR REPLACE FUNCTION highwayhash128(integer)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash128_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash128 function for integer with custom key (4 bigint values) - returns array of two bigints
+CREATE OR REPLACE FUNCTION highwayhash128(integer, bigint, bigint, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash128_int_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash256 function for text (default key) - returns array of four bigints
+CREATE OR REPLACE FUNCTION highwayhash256(text)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash256_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash256 function for text with custom key (4 bigint values) - returns array of four bigints
+CREATE OR REPLACE FUNCTION highwayhash256(text, bigint, bigint, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash256_text_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash256 function for bytea (default key) - returns array of four bigints
+CREATE OR REPLACE FUNCTION highwayhash256(bytea)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash256_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash256 function for bytea with custom key (4 bigint values) - returns array of four bigints
+CREATE OR REPLACE FUNCTION highwayhash256(bytea, bigint, bigint, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash256_bytea_key'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash256 function for integer (default key) - returns array of four bigints
+CREATE OR REPLACE FUNCTION highwayhash256(integer)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash256_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- HighwayHash256 function for integer with custom key (4 bigint values) - returns array of four bigints
+CREATE OR REPLACE FUNCTION highwayhash256(integer, bigint, bigint, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'highwayhash256_int_key'
+LANGUAGE C IMMUTABLE STRICT;

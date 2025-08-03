@@ -1,0 +1,137 @@
+-- Test basic hash functionality with text
+SELECT highwayhash64('hello world');
+   highwayhash64   
+-------------------
+ 55764245668984757
+(1 row)
+
+-- Test hash with different text inputs
+SELECT highwayhash64('test string');
+    highwayhash64     
+----------------------
+ -2758813447935032806
+(1 row)
+
+SELECT highwayhash64('another test');
+    highwayhash64     
+----------------------
+ -5929280350065762128
+(1 row)
+
+-- Test text input with custom key (4 bigint values)
+SELECT highwayhash64('hello world', 1, 2, 3, 4);
+    highwayhash64     
+----------------------
+ -5132475355195403677
+(1 row)
+
+SELECT highwayhash64('hello world', 42, 84, 168, 336);
+    highwayhash64     
+----------------------
+ -1733841754863656890
+(1 row)
+
+-- Test bytea input
+SELECT highwayhash64('hello world'::bytea);
+   highwayhash64   
+-------------------
+ 55764245668984757
+(1 row)
+
+-- Test bytea input with custom key
+SELECT highwayhash64('hello world'::bytea, 1, 2, 3, 4);
+    highwayhash64     
+----------------------
+ -5132475355195403677
+(1 row)
+
+-- Test integer input
+SELECT highwayhash64(12345);
+    highwayhash64     
+----------------------
+ -7518841419134855576
+(1 row)
+
+SELECT highwayhash64(-12345);
+    highwayhash64     
+----------------------
+ -5740664418722816357
+(1 row)
+
+-- Test integer input with custom key
+SELECT highwayhash64(12345, 1, 2, 3, 4);
+    highwayhash64     
+----------------------
+ -8099601468883049044
+(1 row)
+
+SELECT highwayhash64(-12345, 42, 84, 168, 336);
+    highwayhash64     
+----------------------
+ -2934896199736069178
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT highwayhash64('consistent test') = highwayhash64('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test key effect (same input, different keys should give different hashes)
+SELECT highwayhash64('key test', 1, 2, 3, 4) != highwayhash64('key test', 5, 6, 7, 8);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT highwayhash64('');
+    highwayhash64    
+---------------------
+ 1606382020167941598
+(1 row)
+
+-- Test single character
+SELECT highwayhash64('a');
+    highwayhash64    
+---------------------
+ -994871913435693176
+(1 row)
+
+-- Test long string
+SELECT highwayhash64('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+    highwayhash64     
+----------------------
+ -1108139000475772666
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'highwayhash64'
+ORDER BY proname, proargtypes;
+    proname    | provolatile | proisstrict 
+---------------+-------------+-------------
+ highwayhash64 | i           | t
+ highwayhash64 | i           | t
+ highwayhash64 | i           | t
+ highwayhash64 | i           | t
+ highwayhash64 | i           | t
+ highwayhash64 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
