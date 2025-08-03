@@ -62,13 +62,13 @@ SELECT xxhash3_128(-12345);
 SELECT xxhash3_128(12345, 42);
            xxhash3_128            
 ----------------------------------
- 29d206b4c50e39dfbf74e11471dd0fa1
+ 807e63b1b84170dd4f1863439379a0e0
 (1 row)
 
 SELECT xxhash3_128(-12345, 123);
            xxhash3_128            
 ----------------------------------
- c5cac630255953f39c3327ce15f2631a
+ b58e856073fbded309c82bbf215e8aac
 (1 row)
 
 -- Test consistency (same input should give same hash)

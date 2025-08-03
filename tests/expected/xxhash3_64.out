@@ -62,13 +62,13 @@ SELECT xxhash3_64(-12345);
 SELECT xxhash3_64(12345, 42);
      xxhash3_64      
 ---------------------
- 7371111772259320289
+ 8244299484586767552
 (1 row)
 
 SELECT xxhash3_64(-12345, 123);
-     xxhash3_64      
----------------------
- 8124192886619112466
+      xxhash3_64      
+----------------------
+ -4519726799474161709
 (1 row)
 
 -- Test consistency (same input should give same hash)

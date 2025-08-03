@@ -24,6 +24,7 @@ SELECT wyhash('hello world');
 
 For most use cases, start with one of these recommended functions:
 
+- **xxHash3_64** - Next-generation ultra-fast hash with superior quality
 - **WyHash** - Excellent all-around choice, extremely fast with great quality
 - **MurmurHash3** - Popular, well-tested, good for general use
 - **CityHash64** - Great distribution properties, good for data partitioning
@@ -31,6 +32,7 @@ For most use cases, start with one of these recommended functions:
 ```sql
 -- Try each one with the same input to see different outputs
 SELECT 
+    xxhash3_64('user123') as xxhash3_result,
     wyhash('user123') as wyhash_result,
     murmurhash3_32('user123') as murmur_result,
     cityhash64('user123') as city_result;

@@ -8,6 +8,7 @@ This document provides an index to all hash algorithms implemented in pghashlib.
 - **[MurmurHash3](murmurhash3.md)** - Fast, general-purpose hash function
 - **[xxHash32](xxhash32.md)** - Extremely fast 32-bit hash 
 - **[xxHash64](xxhash64.md)** - Extremely fast 64-bit hash
+- **[xxHash3_64](xxhash3_64.md)** - Next-generation 64-bit xxHash with improved performance and quality
 - **[WyHash](wyhash.md)** - One of the fastest quality hash functions (used by Go, Zig, V, Nim)
 - **[t1ha0](t1ha0.md)** - Fastest t1ha variant, CPU-optimized
 - **[t1ha1](t1ha1.md)** - Portable t1ha variant
@@ -23,6 +24,7 @@ This document provides an index to all hash algorithms implemented in pghashlib.
 
 ### Extended Length Hashes
 - **[CityHash128](cityhash128.md)** - 128-bit output for strong collision resistance
+- **[xxHash3_128](xxhash3_128.md)** - Next-generation 128-bit xxHash with superior quality and performance
 - **[SpookyHash128](spookyhash128.md)** - Bob Jenkins' 128-bit hash
 - **[MetroHash128](metrohash128.md)** - 128-bit output with excellent properties
 - **[t1ha2_128](t1ha2_128.md)** - 128-bit version of t1ha2
@@ -46,6 +48,7 @@ This document provides an index to all hash algorithms implemented in pghashlib.
 
 ### Fastest Performance
 - **WyHash** - Extremely fast with excellent quality
+- **xxHash3_64** - Next-generation ultra-fast 64-bit hashing
 - **t1ha0** - CPU-optimized, fastest t1ha variant
 - **xxHash64** - Ultra-fast 64-bit hashing
 - **xxHash32** - Ultra-fast 32-bit hashing
@@ -60,6 +63,7 @@ This document provides an index to all hash algorithms implemented in pghashlib.
 - **HighwayHash** (64/128/256) - SIMD-optimized with cryptographic security
 
 ### Extended Hash Length
+- **xxHash3_128** - Fast 128-bit with superior quality and performance
 - **CityHash128** - Strong 128-bit collision resistance
 - **HighwayHash256** - Maximum 256-bit collision resistance
 - **t1ha2_128** - Fast 128-bit with good quality
@@ -80,6 +84,6 @@ This document provides an index to all hash algorithms implemented in pghashlib.
 - **Recommended**: t1ha1, lookup3le, CityHash family
 
 ### Maximum Performance
-- **Recommended**: WyHash, t1ha0, xxHash64
+- **Recommended**: WyHash, xxHash3_64, t1ha0, xxHash64
 
 Each algorithm documentation includes detailed function signatures, parameters, examples, and specific use case recommendations.
