@@ -1,0 +1,137 @@
+-- Test basic hash functionality with text
+SELECT spookyhash64('hello world');
+     spookyhash64     
+----------------------
+ -6863622830028382147
+(1 row)
+
+-- Test hash with different text inputs
+SELECT spookyhash64('test string');
+     spookyhash64     
+----------------------
+ -6860313425034751925
+(1 row)
+
+SELECT spookyhash64('another test');
+    spookyhash64     
+---------------------
+ 8357941537669845134
+(1 row)
+
+-- Test text input with custom seed
+SELECT spookyhash64('hello world', 42);
+     spookyhash64     
+----------------------
+ -6851237942863650755
+(1 row)
+
+SELECT spookyhash64('hello world', 123);
+     spookyhash64     
+----------------------
+ -6896836863857041347
+(1 row)
+
+-- Test bytea input
+SELECT spookyhash64('hello world'::bytea);
+     spookyhash64     
+----------------------
+ -6863622830028382147
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT spookyhash64('hello world'::bytea, 42);
+     spookyhash64     
+----------------------
+ -6851237942863650755
+(1 row)
+
+-- Test integer input
+SELECT spookyhash64(12345);
+    spookyhash64     
+---------------------
+ 3497333811451464082
+(1 row)
+
+SELECT spookyhash64(-12345);
+    spookyhash64     
+---------------------
+ -885794525883594350
+(1 row)
+
+-- Test integer input with custom seed
+SELECT spookyhash64(12345, 42);
+    spookyhash64     
+---------------------
+ 3520977729896679826
+(1 row)
+
+SELECT spookyhash64(-12345, 123);
+    spookyhash64     
+---------------------
+ -917882627595712110
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT spookyhash64('consistent test') = spookyhash64('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT spookyhash64('seed test', 1) != spookyhash64('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT spookyhash64('');
+    spookyhash64     
+---------------------
+ 2741580708648471845
+(1 row)
+
+-- Test single character
+SELECT spookyhash64('a');
+     spookyhash64     
+----------------------
+ -8036384833395030318
+(1 row)
+
+-- Test long string
+SELECT spookyhash64('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+    spookyhash64     
+---------------------
+ 1374786646752110901
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'spookyhash64'
+ORDER BY proname, proargtypes;
+   proname    | provolatile | proisstrict 
+--------------+-------------+-------------
+ spookyhash64 | i           | t
+ spookyhash64 | i           | t
+ spookyhash64 | i           | t
+ spookyhash64 | i           | t
+ spookyhash64 | i           | t
+ spookyhash64 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

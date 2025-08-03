@@ -1,0 +1,146 @@
+-- Test basic hash functionality with text
+SELECT spookyhash128('hello world');
+               spookyhash128                
+--------------------------------------------
+ {-6863622830028382147,6569195265601149425}
+(1 row)
+
+-- Test hash with different text inputs
+SELECT spookyhash128('test string');
+                spookyhash128                
+---------------------------------------------
+ {-6860313425034751925,-5431870698529247433}
+(1 row)
+
+SELECT spookyhash128('another test');
+               spookyhash128               
+-------------------------------------------
+ {8357941537669845134,2308465386522311744}
+(1 row)
+
+-- Test text input with custom seeds (two 64-bit values)
+SELECT spookyhash128('hello world', 42, 84);
+               spookyhash128                
+--------------------------------------------
+ {-6910910637926309827,6593969530320424101}
+(1 row)
+
+SELECT spookyhash128('hello world', 123, 456);
+               spookyhash128                
+--------------------------------------------
+ {-6687982431137734595,6541028835711707911}
+(1 row)
+
+-- Test bytea input
+SELECT spookyhash128('hello world'::bytea);
+               spookyhash128                
+--------------------------------------------
+ {-6863622830028382147,6569195265601149425}
+(1 row)
+
+-- Test bytea input with custom seeds
+SELECT spookyhash128('hello world'::bytea, 42, 84);
+               spookyhash128                
+--------------------------------------------
+ {-6910910637926309827,6593969530320424101}
+(1 row)
+
+-- Test integer input
+SELECT spookyhash128(12345);
+               spookyhash128                
+--------------------------------------------
+ {3497333811451464082,-6999415554508147432}
+(1 row)
+
+SELECT spookyhash128(-12345);
+               spookyhash128                
+--------------------------------------------
+ {-885794525883594350,-7117083176598842520}
+(1 row)
+
+-- Test integer input with custom seeds
+SELECT spookyhash128(12345, 42, 84);
+               spookyhash128                
+--------------------------------------------
+ {3468060434275076498,-7028693281414799284}
+(1 row)
+
+SELECT spookyhash128(-12345, 123, 456);
+                spookyhash128                
+---------------------------------------------
+ {-1142499659010815598,-7145218270410202722}
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT spookyhash128('consistent test') = spookyhash128('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT spookyhash128('seed test', 1, 2) != spookyhash128('seed test', 3, 4);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT spookyhash128('');
+               spookyhash128                
+--------------------------------------------
+ {2741580708648471845,-3672138309541498381}
+(1 row)
+
+-- Test single character
+SELECT spookyhash128('a');
+                spookyhash128                
+---------------------------------------------
+ {-8036384833395030318,-1961767162533734888}
+(1 row)
+
+-- Test long string
+SELECT spookyhash128('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+               spookyhash128               
+-------------------------------------------
+ {1374786646752110901,-205646723213402587}
+(1 row)
+
+-- Test accessing individual parts of the 128-bit hash
+SELECT 
+    (spookyhash128('hello world'))[1] AS low_64_bits,
+    (spookyhash128('hello world'))[2] AS high_64_bits;
+     low_64_bits      |    high_64_bits     
+----------------------+---------------------
+ -6863622830028382147 | 6569195265601149425
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'spookyhash128'
+ORDER BY proname, proargtypes;
+    proname    | provolatile | proisstrict 
+---------------+-------------+-------------
+ spookyhash128 | i           | t
+ spookyhash128 | i           | t
+ spookyhash128 | i           | t
+ spookyhash128 | i           | t
+ spookyhash128 | i           | t
+ spookyhash128 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

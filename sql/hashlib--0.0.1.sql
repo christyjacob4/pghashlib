@@ -288,3 +288,75 @@ CREATE OR REPLACE FUNCTION siphash24(integer, integer, integer)
 RETURNS bigint
 AS 'MODULE_PATHNAME', 'siphash24_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash64 function for text (default seed)
+CREATE OR REPLACE FUNCTION spookyhash64(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'spookyhash64_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash64 function for text with custom seed
+CREATE OR REPLACE FUNCTION spookyhash64(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'spookyhash64_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash64 function for bytea (default seed)
+CREATE OR REPLACE FUNCTION spookyhash64(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'spookyhash64_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash64 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION spookyhash64(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'spookyhash64_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash64 function for integer (default seed)
+CREATE OR REPLACE FUNCTION spookyhash64(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'spookyhash64_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash64 function for integer with custom seed
+CREATE OR REPLACE FUNCTION spookyhash64(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'spookyhash64_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash128 function for text (default seed) - returns array of two bigints
+CREATE OR REPLACE FUNCTION spookyhash128(text)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'spookyhash128_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash128 function for text with custom seeds - returns array of two bigints
+CREATE OR REPLACE FUNCTION spookyhash128(text, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'spookyhash128_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash128 function for bytea (default seed) - returns array of two bigints
+CREATE OR REPLACE FUNCTION spookyhash128(bytea)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'spookyhash128_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash128 function for bytea with custom seeds - returns array of two bigints
+CREATE OR REPLACE FUNCTION spookyhash128(bytea, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'spookyhash128_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash128 function for integer (default seed) - returns array of two bigints
+CREATE OR REPLACE FUNCTION spookyhash128(integer)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'spookyhash128_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SpookyHash128 function for integer with custom seeds - returns array of two bigints
+CREATE OR REPLACE FUNCTION spookyhash128(integer, bigint, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'spookyhash128_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
