@@ -1,6 +1,6 @@
 # pghashlib
 
-pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, lookup2, lookup3be, and lookup3le algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -18,6 +18,7 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
    - [crc32](#crc32)
    - [cityhash64](#cityhash64)
    - [cityhash128](#cityhash128)
+   - [siphash24](#siphash24)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
    - [lookup3le](#lookup3le)
@@ -121,6 +122,7 @@ CREATE EXTENSION hashlib;
 - **CRC32**: Cyclic redundancy check algorithm for error detection
 - **CityHash64**: High-performance 64-bit hash function from Google
 - **CityHash128**: High-performance 128-bit hash function from Google
+- **SipHash-2-4**: Cryptographic hash function designed for hash table protection against hash flooding attacks
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
 - **lookup3le**: Bob Jenkins' lookup3 hash function with little-endian byte order - optimized for Intel/AMD systems
@@ -137,6 +139,7 @@ CREATE EXTENSION hashlib;
 | `crc32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit CRC32 - cyclic redundancy check hash |
 | `cityhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit CityHash - high-performance hash by Google |
 | `cityhash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit CityHash - returns array of two 64-bit values |
+| `siphash24` | `text`, `bytea`, `integer` | Yes (2 seeds) | `bigint` | 64-bit SipHash-2-4 - cryptographic hash function |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 | `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
@@ -330,6 +333,56 @@ SELECT cityhash128(12345, 42, 84);
 SELECT 
     (cityhash128('hello world'))[1] AS low_64_bits,
     (cityhash128('hello world'))[2] AS high_64_bits;
+```
+
+</details>
+
+### siphash24
+
+SipHash-2-4 is a cryptographic hash function designed to provide strong protection against hash flooding attacks while maintaining good performance. It uses a 128-bit key for secure hashing.
+
+**Signatures:**
+- `siphash24(text)` → `bigint`
+- `siphash24(text, integer, integer)` → `bigint`
+- `siphash24(bytea)` → `bigint`
+- `siphash24(bytea, integer, integer)` → `bigint`
+- `siphash24(integer)` → `bigint`
+- `siphash24(integer, integer, integer)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): First 32-bit seed value for 128-bit key
+- Third parameter (optional): Second 32-bit seed value for 128-bit key
+
+**Note:** SipHash-2-4 requires a 128-bit key for security. When using custom seeds, provide both 32-bit values. If no seeds are provided, a default key is used.
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default key
+SELECT siphash24('hello world');
+-- Result: Secure hash with default key
+
+-- Hash text with custom 128-bit key (two 32-bit seeds)
+SELECT siphash24('hello world', 42, 84);
+-- Result: Secure hash with custom key
+
+-- Hash bytea data
+SELECT siphash24('hello world'::bytea);
+-- Result: Secure hash of bytea data
+
+-- Hash bytea with custom key
+SELECT siphash24('hello world'::bytea, 42, 84);
+-- Result: Secure hash with custom key
+
+-- Hash integer values
+SELECT siphash24(12345);
+-- Result: Secure hash of integer
+
+-- Hash integer with custom key
+SELECT siphash24(12345, 42, 84);
+-- Result: Secure hash with custom key
 ```
 
 </details>
@@ -577,6 +630,7 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 
 - MurmurHash3 algorithm by Austin Appleby
 - CityHash algorithm by Google Inc.
+- SipHash-2-4 algorithm by Jean-Philippe Aumasson and Daniel J. Bernstein
 - lookup2 and lookup3be algorithms by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support
