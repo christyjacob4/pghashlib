@@ -1,0 +1,146 @@
+-- Test basic hash functionality with text
+SELECT highwayhash128('hello world');
+               highwayhash128               
+--------------------------------------------
+ {-9002307960715477272,6897575193667018684}
+(1 row)
+
+-- Test hash with different text inputs
+SELECT highwayhash128('test string');
+              highwayhash128               
+-------------------------------------------
+ {8790480909741334366,6896986531429733706}
+(1 row)
+
+SELECT highwayhash128('another test');
+               highwayhash128               
+--------------------------------------------
+ {8750845589835017075,-3322922193145760634}
+(1 row)
+
+-- Test text input with custom key (4 bigint values)
+SELECT highwayhash128('hello world', 1, 2, 3, 4);
+               highwayhash128               
+--------------------------------------------
+ {-7700241520037866853,5736295513518689358}
+(1 row)
+
+SELECT highwayhash128('hello world', 42, 84, 168, 336);
+              highwayhash128               
+-------------------------------------------
+ {9185465481520367157,6499493138150571029}
+(1 row)
+
+-- Test bytea input
+SELECT highwayhash128('hello world'::bytea);
+               highwayhash128               
+--------------------------------------------
+ {-9002307960715477272,6897575193667018684}
+(1 row)
+
+-- Test bytea input with custom key
+SELECT highwayhash128('hello world'::bytea, 1, 2, 3, 4);
+               highwayhash128               
+--------------------------------------------
+ {-7700241520037866853,5736295513518689358}
+(1 row)
+
+-- Test integer input
+SELECT highwayhash128(12345);
+             highwayhash128              
+-----------------------------------------
+ {84525206629202176,7442391580945017510}
+(1 row)
+
+SELECT highwayhash128(-12345);
+             highwayhash128              
+-----------------------------------------
+ {84608127624122420,7442391580944332183}
+(1 row)
+
+-- Test integer input with custom key
+SELECT highwayhash128(12345, 1, 2, 3, 4);
+              highwayhash128               
+-------------------------------------------
+ {1101827263166064017,5877542203892655696}
+(1 row)
+
+SELECT highwayhash128(-12345, 42, 84, 168, 336);
+             highwayhash128              
+-----------------------------------------
+ {59931498248258631,7488800884916746726}
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT highwayhash128('consistent test') = highwayhash128('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test key effect (same input, different keys should give different hashes)
+SELECT highwayhash128('key test', 1, 2, 3, 4) != highwayhash128('key test', 5, 6, 7, 8);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT highwayhash128('');
+               highwayhash128               
+--------------------------------------------
+ {-8830773993745385472,4591297386336765809}
+(1 row)
+
+-- Test single character
+SELECT highwayhash128('a');
+             highwayhash128              
+-----------------------------------------
+ {-6068668903039879,7720386185158543736}
+(1 row)
+
+-- Test long string
+SELECT highwayhash128('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+               highwayhash128               
+--------------------------------------------
+ {-8597214559374803647,-629738111796056425}
+(1 row)
+
+-- Test array access (128-bit hash returns array of two bigints)
+SELECT 
+    (highwayhash128('hello world'))[1] AS first_64_bits,
+    (highwayhash128('hello world'))[2] AS second_64_bits;
+    first_64_bits     |   second_64_bits    
+----------------------+---------------------
+ -9002307960715477272 | 6897575193667018684
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'highwayhash128'
+ORDER BY proname, proargtypes;
+    proname     | provolatile | proisstrict 
+----------------+-------------+-------------
+ highwayhash128 | i           | t
+ highwayhash128 | i           | t
+ highwayhash128 | i           | t
+ highwayhash128 | i           | t
+ highwayhash128 | i           | t
+ highwayhash128 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

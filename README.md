@@ -1,6 +1,6 @@
 # pghashlib
 
-pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, lookup2, lookup3be, and lookup3le algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -25,6 +25,9 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
    - [xxhash64](#xxhash64)
    - [farmhash32](#farmhash32)
    - [farmhash64](#farmhash64)
+   - [highwayhash64](#highwayhash64)
+   - [highwayhash128](#highwayhash128)
+   - [highwayhash256](#highwayhash256)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
    - [lookup3le](#lookup3le)
@@ -135,6 +138,9 @@ CREATE EXTENSION hashlib;
 - **xxHash64**: Extremely fast 64-bit non-cryptographic hash function optimized for speed
 - **FarmHash32**: Google's successor to CityHash with improved distribution properties (32-bit)
 - **FarmHash64**: Google's successor to CityHash with improved distribution properties (64-bit)
+- **HighwayHash64**: Google's SIMD-optimized keyed hash function (64-bit) - designed for high throughput
+- **HighwayHash128**: Google's SIMD-optimized keyed hash function (128-bit) - strong data integrity verification
+- **HighwayHash256**: Google's SIMD-optimized keyed hash function (256-bit) - maximum collision resistance
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
 - **lookup3le**: Bob Jenkins' lookup3 hash function with little-endian byte order - optimized for Intel/AMD systems
@@ -158,6 +164,9 @@ CREATE EXTENSION hashlib;
 | `xxhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit xxHash - extremely fast non-cryptographic hash |
 | `farmhash32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit FarmHash - Google's successor to CityHash |
 | `farmhash64` | `text`, `bytea`, `integer` | Yes (2 seeds) | `bigint` | 64-bit FarmHash - Google's successor to CityHash |
+| `highwayhash64` | `text`, `bytea`, `integer` | Yes (4 keys) | `bigint` | 64-bit HighwayHash - Google's SIMD-optimized keyed hash |
+| `highwayhash128` | `text`, `bytea`, `integer` | Yes (4 keys) | `bigint[]` | 128-bit HighwayHash - returns array of two 64-bit values |
+| `highwayhash256` | `text`, `bytea`, `integer` | Yes (4 keys) | `bigint[]` | 256-bit HighwayHash - returns array of four 64-bit values |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 | `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
@@ -620,6 +629,171 @@ SELECT farmhash64(12345, 42, 84);
 
 </details>
 
+### highwayhash64
+
+HighwayHash64 is Google's SIMD-optimized keyed hash function providing 64-bit output. It uses a 256-bit key and is designed for high-throughput hashing with cryptographic-level security.
+
+**Signatures:**
+- `highwayhash64(text)` → `bigint`
+- `highwayhash64(text, bigint, bigint, bigint, bigint)` → `bigint`
+- `highwayhash64(bytea)` → `bigint`
+- `highwayhash64(bytea, bigint, bigint, bigint, bigint)` → `bigint`
+- `highwayhash64(integer)` → `bigint`
+- `highwayhash64(integer, bigint, bigint, bigint, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Key parameters (optional): Four 64-bit values forming a 256-bit key (default key used if not provided)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default key
+SELECT highwayhash64('hello world');
+-- Result: SIMD-optimized 64-bit hash
+
+-- Hash text with custom key (4 bigint values)
+SELECT highwayhash64('hello world', 1, 2, 3, 4);
+-- Result: Keyed hash with custom 256-bit key
+
+-- Hash bytea data
+SELECT highwayhash64('hello world'::bytea);
+-- Result: SIMD-optimized hash of bytea data
+
+-- Hash bytea with custom key
+SELECT highwayhash64('hello world'::bytea, 42, 84, 168, 336);
+-- Result: Keyed hash with custom key
+
+-- Hash integer values
+SELECT highwayhash64(12345);
+-- Result: SIMD-optimized hash of integer
+
+-- Hash integer with custom key
+SELECT highwayhash64(12345, 1, 2, 3, 4);
+-- Result: Keyed hash with custom key
+```
+
+</details>
+
+### highwayhash128
+
+HighwayHash128 is Google's SIMD-optimized keyed hash function providing 128-bit output for stronger collision resistance and data integrity verification.
+
+**Signatures:**
+- `highwayhash128(text)` → `bigint[]`
+- `highwayhash128(text, bigint, bigint, bigint, bigint)` → `bigint[]`
+- `highwayhash128(bytea)` → `bigint[]`
+- `highwayhash128(bytea, bigint, bigint, bigint, bigint)` → `bigint[]`
+- `highwayhash128(integer)` → `bigint[]`
+- `highwayhash128(integer, bigint, bigint, bigint, bigint)` → `bigint[]`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Key parameters (optional): Four 64-bit values forming a 256-bit key (default key used if not provided)
+
+**Return Value:**
+Returns an array of two `bigint` values representing the 128-bit hash:
+- `[1]`: First 64 bits of the hash
+- `[2]`: Second 64 bits of the hash
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default key
+SELECT highwayhash128('hello world');
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash text with custom key
+SELECT highwayhash128('hello world', 1, 2, 3, 4);
+-- Result: Keyed 128-bit hash
+
+-- Hash bytea data
+SELECT highwayhash128('hello world'::bytea);
+-- Result: SIMD-optimized 128-bit hash
+
+-- Hash bytea with custom key
+SELECT highwayhash128('hello world'::bytea, 42, 84, 168, 336);
+-- Result: Keyed 128-bit hash
+
+-- Hash integer values
+SELECT highwayhash128(12345);
+-- Result: SIMD-optimized 128-bit hash
+
+-- Hash integer with custom key
+SELECT highwayhash128(12345, 1, 2, 3, 4);
+-- Result: Keyed 128-bit hash
+
+-- Access individual parts of the 128-bit hash
+SELECT 
+    (highwayhash128('hello world'))[1] AS first_64_bits,
+    (highwayhash128('hello world'))[2] AS second_64_bits;
+```
+
+</details>
+
+### highwayhash256
+
+HighwayHash256 is Google's SIMD-optimized keyed hash function providing 256-bit output for maximum collision resistance and cryptographic applications.
+
+**Signatures:**
+- `highwayhash256(text)` → `bigint[]`
+- `highwayhash256(text, bigint, bigint, bigint, bigint)` → `bigint[]`
+- `highwayhash256(bytea)` → `bigint[]`
+- `highwayhash256(bytea, bigint, bigint, bigint, bigint)` → `bigint[]`
+- `highwayhash256(integer)` → `bigint[]`
+- `highwayhash256(integer, bigint, bigint, bigint, bigint)` → `bigint[]`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Key parameters (optional): Four 64-bit values forming a 256-bit key (default key used if not provided)
+
+**Return Value:**
+Returns an array of four `bigint` values representing the 256-bit hash:
+- `[1]`: First 64 bits of the hash
+- `[2]`: Second 64 bits of the hash
+- `[3]`: Third 64 bits of the hash
+- `[4]`: Fourth 64 bits of the hash
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default key
+SELECT highwayhash256('hello world');
+-- Result: {first_64_bits, second_64_bits, third_64_bits, fourth_64_bits}
+
+-- Hash text with custom key
+SELECT highwayhash256('hello world', 1, 2, 3, 4);
+-- Result: Keyed 256-bit hash
+
+-- Hash bytea data
+SELECT highwayhash256('hello world'::bytea);
+-- Result: SIMD-optimized 256-bit hash
+
+-- Hash bytea with custom key
+SELECT highwayhash256('hello world'::bytea, 42, 84, 168, 336);
+-- Result: Keyed 256-bit hash
+
+-- Hash integer values
+SELECT highwayhash256(12345);
+-- Result: SIMD-optimized 256-bit hash
+
+-- Hash integer with custom key
+SELECT highwayhash256(12345, 1, 2, 3, 4);
+-- Result: Keyed 256-bit hash
+
+-- Access individual parts of the 256-bit hash
+SELECT 
+    (highwayhash256('hello world'))[1] AS first_64_bits,
+    (highwayhash256('hello world'))[2] AS second_64_bits,
+    (highwayhash256('hello world'))[3] AS third_64_bits,
+    (highwayhash256('hello world'))[4] AS fourth_64_bits;
+```
+
+</details>
+
 ### lookup2
 
 lookup2 is Bob Jenkins' hash function, designed for fast hashing with good distribution properties.
@@ -956,7 +1130,7 @@ Additional non-cryptographic hash functions planned for future releases:
 ### **High Priority**
 - [x] **xxHash** (xxh32, xxh64) - Extremely fast general-purpose hashing
 - [x] **FarmHash** - Google's successor to CityHash with better distribution
-- [ ] **HighwayHash** - SIMD-optimized keyed hash function
+- [x] **HighwayHash** - SIMD-optimized keyed hash function
 
 ### **Medium Priority**
 - [ ] **MetroHash** - Fast alternative with good avalanche properties
@@ -981,6 +1155,7 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 - SpookyHash algorithm by Bob Jenkins
 - xxHash algorithm by Yann Collet
 - FarmHash algorithm by Google Inc.
+- HighwayHash algorithm by Google Inc.
 - lookup2 and lookup3be algorithms by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support
