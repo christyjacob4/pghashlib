@@ -1,6 +1,6 @@
 # pghashlib
 
-pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, lookup2, lookup3be, and lookup3le algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, MetroHash64, MetroHash128, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -28,6 +28,8 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
    - [highwayhash64](#highwayhash64)
    - [highwayhash128](#highwayhash128)
    - [highwayhash256](#highwayhash256)
+   - [metrohash64](#metrohash64)
+   - [metrohash128](#metrohash128)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
    - [lookup3le](#lookup3le)
@@ -141,6 +143,8 @@ CREATE EXTENSION hashlib;
 - **HighwayHash64**: Google's SIMD-optimized keyed hash function (64-bit) - designed for high throughput
 - **HighwayHash128**: Google's SIMD-optimized keyed hash function (128-bit) - strong data integrity verification
 - **HighwayHash256**: Google's SIMD-optimized keyed hash function (256-bit) - maximum collision resistance
+- **MetroHash64**: Fast alternative with excellent avalanche properties (64-bit) - algorithmically generated for performance
+- **MetroHash128**: Fast alternative with excellent avalanche properties (128-bit) - strong statistical profile similar to MD5
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
 - **lookup3le**: Bob Jenkins' lookup3 hash function with little-endian byte order - optimized for Intel/AMD systems
@@ -167,6 +171,8 @@ CREATE EXTENSION hashlib;
 | `highwayhash64` | `text`, `bytea`, `integer` | Yes (4 keys) | `bigint` | 64-bit HighwayHash - Google's SIMD-optimized keyed hash |
 | `highwayhash128` | `text`, `bytea`, `integer` | Yes (4 keys) | `bigint[]` | 128-bit HighwayHash - returns array of two 64-bit values |
 | `highwayhash256` | `text`, `bytea`, `integer` | Yes (4 keys) | `bigint[]` | 256-bit HighwayHash - returns array of four 64-bit values |
+| `metrohash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit MetroHash - fast alternative with excellent avalanche properties |
+| `metrohash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit MetroHash - returns array of two 64-bit values |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 | `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
@@ -794,6 +800,110 @@ SELECT
 
 </details>
 
+### metrohash64
+
+MetroHash64 is a fast alternative hash function with excellent avalanche properties. It's algorithmically generated for performance and provides a good balance of speed and distribution quality.
+
+**Signatures:**
+- `metrohash64(text)` → `bigint`
+- `metrohash64(text, bigint)` → `bigint`
+- `metrohash64(bytea)` → `bigint`
+- `metrohash64(bytea, bigint)` → `bigint`
+- `metrohash64(integer)` → `bigint`
+- `metrohash64(integer, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT metrohash64('hello world');
+-- Result: Fast 64-bit MetroHash
+
+-- Hash text with custom seed
+SELECT metrohash64('hello world', 42);
+-- Result: Fast 64-bit MetroHash with custom seed
+
+-- Hash bytea data
+SELECT metrohash64('hello world'::bytea);
+-- Result: Fast 64-bit MetroHash of bytea data
+
+-- Hash bytea with custom seed
+SELECT metrohash64('hello world'::bytea, 42);
+-- Result: Fast 64-bit MetroHash with custom seed
+
+-- Hash integer values
+SELECT metrohash64(12345);
+-- Result: Fast 64-bit MetroHash of integer
+
+-- Hash integer with custom seed
+SELECT metrohash64(12345, 42);
+-- Result: Fast 64-bit MetroHash with custom seed
+```
+
+</details>
+
+### metrohash128
+
+MetroHash128 is a fast alternative hash function providing 128-bit output with excellent avalanche properties and a strong statistical profile similar to MD5 but much faster.
+
+**Signatures:**
+- `metrohash128(text)` → `bigint[]`
+- `metrohash128(text, bigint)` → `bigint[]`
+- `metrohash128(bytea)` → `bigint[]`
+- `metrohash128(bytea, bigint)` → `bigint[]`
+- `metrohash128(integer)` → `bigint[]`
+- `metrohash128(integer, bigint)` → `bigint[]`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+**Return Value:**
+Returns an array of two `bigint` values representing the 128-bit hash:
+- `[1]`: First 64 bits of the hash
+- `[2]`: Second 64 bits of the hash
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT metrohash128('hello world');
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash text with custom seed
+SELECT metrohash128('hello world', 42);
+-- Result: Fast 128-bit MetroHash with custom seed
+
+-- Hash bytea data
+SELECT metrohash128('hello world'::bytea);
+-- Result: Fast 128-bit MetroHash of bytea data
+
+-- Hash bytea with custom seed
+SELECT metrohash128('hello world'::bytea, 42);
+-- Result: Fast 128-bit MetroHash with custom seed
+
+-- Hash integer values
+SELECT metrohash128(12345);
+-- Result: Fast 128-bit MetroHash of integer
+
+-- Hash integer with custom seed
+SELECT metrohash128(12345, 42);
+-- Result: Fast 128-bit MetroHash with custom seed
+
+-- Access individual parts of the 128-bit hash
+SELECT 
+    (metrohash128('hello world'))[1] AS first_64_bits,
+    (metrohash128('hello world'))[2] AS second_64_bits;
+```
+
+</details>
+
 ### lookup2
 
 lookup2 is Bob Jenkins' hash function, designed for fast hashing with good distribution properties.
@@ -1133,7 +1243,7 @@ Additional non-cryptographic hash functions planned for future releases:
 - [x] **HighwayHash** - SIMD-optimized keyed hash function
 
 ### **Medium Priority**
-- [ ] **MetroHash** - Fast alternative with good avalanche properties
+- [x] **MetroHash** - Fast alternative with good avalanche properties
 - [ ] **t1ha** - Fast Positive Hash optimized for x86-64
 - [ ] **wyhash** - Simple, fast implementation
 
@@ -1156,6 +1266,7 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 - xxHash algorithm by Yann Collet
 - FarmHash algorithm by Google Inc.
 - HighwayHash algorithm by Google Inc.
+- MetroHash algorithm by J. Andrew Rogers
 - lookup2 and lookup3be algorithms by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support

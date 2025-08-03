@@ -630,3 +630,75 @@ CREATE OR REPLACE FUNCTION highwayhash256(integer, bigint, bigint, bigint, bigin
 RETURNS bigint[]
 AS 'MODULE_PATHNAME', 'highwayhash256_int_key'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash64 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION metrohash64(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'metrohash64_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash64 function for text with custom seed
+CREATE OR REPLACE FUNCTION metrohash64(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'metrohash64_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash64 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION metrohash64(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'metrohash64_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash64 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION metrohash64(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'metrohash64_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash64 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION metrohash64(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'metrohash64_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash64 function for integer with custom seed
+CREATE OR REPLACE FUNCTION metrohash64(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'metrohash64_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash128 function for text (default seed = 0) - returns array of two bigints
+CREATE OR REPLACE FUNCTION metrohash128(text)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'metrohash128_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash128 function for text with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION metrohash128(text, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'metrohash128_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash128 function for bytea (default seed = 0) - returns array of two bigints
+CREATE OR REPLACE FUNCTION metrohash128(bytea)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'metrohash128_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash128 function for bytea with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION metrohash128(bytea, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'metrohash128_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash128 function for integer (default seed = 0) - returns array of two bigints
+CREATE OR REPLACE FUNCTION metrohash128(integer)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'metrohash128_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- MetroHash128 function for integer with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION metrohash128(integer, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 'metrohash128_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
