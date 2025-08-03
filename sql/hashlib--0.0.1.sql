@@ -846,3 +846,51 @@ CREATE OR REPLACE FUNCTION t1ha2_128(integer, bigint)
 RETURNS bigint[]
 AS 'MODULE_PATHNAME', 't1ha2_128_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION wyhash(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for text with custom seed
+CREATE OR REPLACE FUNCTION wyhash(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION wyhash(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for bytea with custom seed
+CREATE OR REPLACE FUNCTION wyhash(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION wyhash(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_int4'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for integer with custom seed
+CREATE OR REPLACE FUNCTION wyhash(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_int4_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for bigint (default seed = 0)
+CREATE OR REPLACE FUNCTION wyhash(bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_int8'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- WyHash function for bigint with custom seed
+CREATE OR REPLACE FUNCTION wyhash(bigint, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'wyhash_int8_seed'
+LANGUAGE C IMMUTABLE STRICT;

@@ -1,6 +1,6 @@
 # pghashlib
 
-pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, MetroHash64, MetroHash128, t1ha0, t1ha1, t1ha2, t1ha2_128, lookup2, lookup3be, and lookup3le algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, MetroHash64, MetroHash128, t1ha0, t1ha1, t1ha2, t1ha2_128, WyHash, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -34,6 +34,7 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
    - [t1ha1](#t1ha1)
    - [t1ha2](#t1ha2)
    - [t1ha2_128](#t1ha2_128)
+   - [wyhash](#wyhash)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
    - [lookup3le](#lookup3le)
@@ -185,6 +186,7 @@ CREATE EXTENSION hashlib;
 | `t1ha1` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit t1ha1 - baseline portable hash with stable results |
 | `t1ha2` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit t1ha2 - recommended variant optimized for 64-bit systems |
 | `t1ha2_128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit t1ha2 - returns array of two 64-bit values |
+| `wyhash` | `text`, `bytea`, `integer`, `bigint` | Yes | `bigint` | 64-bit WyHash - extremely fast quality hash used by Go, Zig, V, Nim |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 | `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
@@ -1082,6 +1084,72 @@ SELECT
 
 </details>
 
+### wyhash
+
+<details>
+<summary>Click to expand wyhash usage examples</summary>
+
+WyHash is one of the fastest quality hash functions available, designed by Wang Yi. It offers exceptional performance while maintaining excellent hash quality and is used as the default hash algorithm in Go (since 1.17), Zig, V, and Nim languages.
+
+**Key Features:**
+- Extremely fast performance, often faster than xxHash3 and t1ha
+- Excellent hash quality, passes all SMHasher tests
+- Optimized for modern 64-bit systems
+- Particularly efficient with short keys
+- Public domain license (The Unlicense)
+
+**Signatures:**
+- `wyhash(text)` → `bigint`
+- `wyhash(text, bigint)` → `bigint`
+- `wyhash(bytea)` → `bigint`
+- `wyhash(bytea, bigint)` → `bigint`
+- `wyhash(integer)` → `bigint`
+- `wyhash(integer, bigint)` → `bigint`
+- `wyhash(bigint)` → `bigint`
+- `wyhash(bigint, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, `integer`, or `bigint`)
+- Second parameter (optional): Seed value (default: 0)
+
+**Return Value:**
+Returns a 64-bit signed integer (`bigint`) hash value.
+
+**Usage Examples:**
+```sql
+-- Hash text data
+SELECT wyhash('hello world');
+-- Result: Fast, high-quality WyHash of text
+
+-- Hash text with custom seed
+SELECT wyhash('hello world', 42);
+-- Result: Fast, high-quality WyHash with custom seed
+
+-- Hash bytea data
+SELECT wyhash('hello world'::bytea);
+-- Result: Fast, high-quality WyHash of bytea data
+
+-- Hash integer values
+SELECT wyhash(12345);
+-- Result: Fast, high-quality WyHash of integer
+
+-- Hash bigint values
+SELECT wyhash(123456789012345::bigint);
+-- Result: Fast, high-quality WyHash of bigint value
+
+-- Use in data partitioning (extremely fast)
+SELECT 
+    user_id,
+    abs(wyhash(user_id::text) % 10) as partition
+FROM users;
+
+-- Use for sampling (high performance)
+SELECT * FROM large_table 
+WHERE abs(wyhash(id::text) % 100) < 5;  -- 5% sample
+```
+
+</details>
+
 ### lookup2
 
 lookup2 is Bob Jenkins' hash function, designed for fast hashing with good distribution properties.
@@ -1423,7 +1491,7 @@ Additional non-cryptographic hash functions planned for future releases:
 ### **Medium Priority**
 - [x] **MetroHash** - Fast alternative with good avalanche properties
 - [x] **t1ha** - Fast Positive Hash optimized for x86-64
-- [ ] **wyhash** - Simple, fast implementation
+- [x] **wyhash** - Simple, fast implementation
 
 ### **Specialized**
 - [ ] **Adler-32** - Fast checksum (used in zlib)

@@ -1,0 +1,269 @@
+-- Test basic hash functionality with text
+SELECT wyhash('hello world');
+        wyhash        
+----------------------
+ -2049815887495798387
+(1 row)
+
+-- Test hash with different text inputs
+SELECT wyhash('test string');
+        wyhash        
+----------------------
+ -7567933614397821253
+(1 row)
+
+SELECT wyhash('another test');
+        wyhash        
+----------------------
+ -5790097454891546133
+(1 row)
+
+-- Test text input with custom seed
+SELECT wyhash('hello world', 42);
+       wyhash        
+---------------------
+ 8073655121646406884
+(1 row)
+
+SELECT wyhash('hello world', 84);
+       wyhash       
+--------------------
+ 849584740852202677
+(1 row)
+
+-- Test bytea input
+SELECT wyhash('hello world'::bytea);
+        wyhash        
+----------------------
+ -2049815887495798387
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT wyhash('hello world'::bytea, 42);
+       wyhash        
+---------------------
+ 8073655121646406884
+(1 row)
+
+-- Test integer input
+SELECT wyhash(12345);
+        wyhash        
+----------------------
+ -7281976281920181492
+(1 row)
+
+SELECT wyhash(-12345);
+        wyhash        
+----------------------
+ -7281976281920181492
+(1 row)
+
+-- Test integer input with custom seed
+SELECT wyhash(12345, 42);
+        wyhash        
+----------------------
+ -3200717158655706313
+(1 row)
+
+SELECT wyhash(-12345, 84);
+       wyhash       
+--------------------
+ 725163237900096566
+(1 row)
+
+-- Test bigint input
+SELECT wyhash(123456789012345::bigint);
+       wyhash        
+---------------------
+ 1792443220689638201
+(1 row)
+
+SELECT wyhash(-123456789012345::bigint);
+       wyhash        
+---------------------
+ 1792443220689638201
+(1 row)
+
+-- Test bigint input with custom seed
+SELECT wyhash(123456789012345::bigint, 42);
+       wyhash        
+---------------------
+ 4605358307667765892
+(1 row)
+
+SELECT wyhash(-123456789012345::bigint, 84);
+       wyhash        
+---------------------
+ 2209537139147064014
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT wyhash('consistent test') = wyhash('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT wyhash('seed test', 1) != wyhash('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT wyhash('');
+        wyhash        
+----------------------
+ -6563387937136629529
+(1 row)
+
+-- Test single character
+SELECT wyhash('a');
+       wyhash        
+---------------------
+ 8683163932574550325
+(1 row)
+
+-- Test long string
+SELECT wyhash('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+        wyhash        
+----------------------
+ -8824505840497579875
+(1 row)
+
+-- Test various input lengths to test different code paths
+SELECT wyhash('1234567');           -- 7 bytes
+       wyhash        
+---------------------
+ -953744010056697027
+(1 row)
+
+SELECT wyhash('12345678');          -- 8 bytes  
+        wyhash        
+----------------------
+ -3546701811555956394
+(1 row)
+
+SELECT wyhash('123456789012345');   -- 15 bytes
+      wyhash      
+------------------
+ -509925472009940
+(1 row)
+
+SELECT wyhash('1234567890123456');  -- 16 bytes
+       wyhash        
+---------------------
+ -430897413539575610
+(1 row)
+
+SELECT wyhash('12345678901234567890123456789012'); -- 32 bytes
+        wyhash        
+----------------------
+ -7760233746171867325
+(1 row)
+
+SELECT wyhash('123456789012345678901234567890123'); -- 33 bytes
+       wyhash        
+---------------------
+ 1146401776928495930
+(1 row)
+
+SELECT wyhash('1234567890123456789012345678901234567890123456789012345'); -- 49 bytes (> 48)
+       wyhash        
+---------------------
+ -384525305948375213
+(1 row)
+
+-- Test zero values
+SELECT wyhash(0);
+        wyhash        
+----------------------
+ -7281976281920181492
+(1 row)
+
+SELECT wyhash(0::bigint);
+       wyhash        
+---------------------
+ 1792443220689638201
+(1 row)
+
+-- Test maximum values
+SELECT wyhash(2147483647);          -- max int4
+        wyhash        
+----------------------
+ -7281976281920181492
+(1 row)
+
+SELECT wyhash(-2147483648);         -- min int4
+        wyhash        
+----------------------
+ -7281976281920181492
+(1 row)
+
+SELECT wyhash(9223372036854775807::bigint);  -- max int8
+       wyhash        
+---------------------
+ 1792443220689638201
+(1 row)
+
+SELECT wyhash(-9223372036854775808::bigint); -- min int8
+ERROR:  bigint out of range
+-- Test with various seeds
+SELECT wyhash('test', 0);
+        wyhash        
+----------------------
+ -1998748388848454063
+(1 row)
+
+SELECT wyhash('test', 1);
+       wyhash        
+---------------------
+ -553372301365056975
+(1 row)
+
+SELECT wyhash('test', -1);
+       wyhash        
+---------------------
+ 3168720454468102386
+(1 row)
+
+SELECT wyhash('test', 9223372036854775807::bigint);   -- max positive seed
+        wyhash        
+----------------------
+ -2235310068612373038
+(1 row)
+
+SELECT wyhash('test', -9223372036854775808::bigint);  -- max negative seed
+ERROR:  bigint out of range
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'wyhash'
+ORDER BY proname, proargtypes;
+ proname | provolatile | proisstrict 
+---------+-------------+-------------
+ wyhash  | i           | t
+ wyhash  | i           | t
+ wyhash  | i           | t
+ wyhash  | i           | t
+ wyhash  | i           | t
+ wyhash  | i           | t
+ wyhash  | i           | t
+ wyhash  | i           | t
+(8 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
