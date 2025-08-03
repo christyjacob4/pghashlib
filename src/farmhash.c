@@ -47,15 +47,6 @@ static uint32_t farmhash_fmix32(uint32_t h)
     return h;
 }
 
-static uint64_t farmhash_fmix64(uint64_t k)
-{
-    k ^= k >> 33;
-    k *= 0xff51afd7ed558ccdULL;
-    k ^= k >> 33;
-    k *= 0xc4ceb9fe1a85ec53ULL;
-    k ^= k >> 33;
-    return k;
-}
 
 static uint64_t farmhash_shift_mix(uint64_t val)
 {
@@ -64,9 +55,10 @@ static uint64_t farmhash_shift_mix(uint64_t val)
 
 static uint64_t farmhash_hash_len_16(uint64_t u, uint64_t v, uint64_t mul)
 {
-    uint64_t a = (u ^ v) * mul;
+    uint64_t a, b;
+    a = (u ^ v) * mul;
     a ^= (a >> 47);
-    uint64_t b = (v ^ a) * mul;
+    b = (v ^ a) * mul;
     b ^= (b >> 47);
     b *= mul;
     return b;
@@ -137,14 +129,18 @@ farmhash32_impl(const char *s, size_t len)
     }
 
     /* Hash longer strings */
-    uint32_t h = (uint32_t)len;
-    uint32_t g = FARMHASH_C1 * (uint32_t)len;
-    uint32_t f = g;
-    uint32_t a0 = farmhash_rotl32(farmhash_fetch32(s + len - 4) * FARMHASH_C1, 17) * FARMHASH_C2;
-    uint32_t a1 = farmhash_rotl32(farmhash_fetch32(s + len - 8) * FARMHASH_C1, 17) * FARMHASH_C2;
-    uint32_t a2 = farmhash_rotl32(farmhash_fetch32(s + len - 16) * FARMHASH_C1, 17) * FARMHASH_C2;
-    uint32_t a3 = farmhash_rotl32(farmhash_fetch32(s + len - 12) * FARMHASH_C1, 17) * FARMHASH_C2;
-    uint32_t a4 = farmhash_rotl32(farmhash_fetch32(s + len - 20) * FARMHASH_C1, 17) * FARMHASH_C2;
+    {
+        uint32_t h, g, f, a0, a1, a2, a3, a4;
+        size_t iters;
+        
+        h = (uint32_t)len;
+        g = FARMHASH_C1 * (uint32_t)len;
+        f = g;
+        a0 = farmhash_rotl32(farmhash_fetch32(s + len - 4) * FARMHASH_C1, 17) * FARMHASH_C2;
+        a1 = farmhash_rotl32(farmhash_fetch32(s + len - 8) * FARMHASH_C1, 17) * FARMHASH_C2;
+        a2 = farmhash_rotl32(farmhash_fetch32(s + len - 16) * FARMHASH_C1, 17) * FARMHASH_C2;
+        a3 = farmhash_rotl32(farmhash_fetch32(s + len - 12) * FARMHASH_C1, 17) * FARMHASH_C2;
+        a4 = farmhash_rotl32(farmhash_fetch32(s + len - 20) * FARMHASH_C1, 17) * FARMHASH_C2;
     
     h ^= a0;
     h = farmhash_rotl32(h, 19);
@@ -158,38 +154,40 @@ farmhash32_impl(const char *s, size_t len)
     g ^= a3;
     g = farmhash_rotl32(g, 19);
     g = g * 5 + 0xe6546b64;
-    f += a4;
-    f = farmhash_rotl32(f, 19) + 113;
-    
-    size_t iters = (len - 1) / 20;
-    do {
-        uint32_t a = farmhash_fetch32(s);
-        uint32_t b = farmhash_fetch32(s + 4);
-        uint32_t c = farmhash_fetch32(s + 8);
-        uint32_t d = farmhash_fetch32(s + 12);
-        uint32_t e = farmhash_fetch32(s + 16);
-        h += a;
-        g += b;
-        f += c;
-        h = farmhash32_mur(d, h) + e;
-        g = farmhash32_mur(c, g) + a;
-        f = farmhash32_mur(b + e * FARMHASH_C1, f) + d;
-        f += g;
-        g += f;
-        s += 20;
-    } while (--iters != 0);
-    
-    g = farmhash_rotl32(g, 11) * FARMHASH_C1;
-    g = farmhash_rotl32(g, 17) * FARMHASH_C1;
-    f = farmhash_rotl32(f, 11) * FARMHASH_C1;
-    f = farmhash_rotl32(f, 17) * FARMHASH_C1;
-    h = farmhash_rotl32(h + g, 19);
-    h = h * 5 + 0xe6546b64;
-    h = farmhash_rotl32(h, 17) * FARMHASH_C1;
-    h = farmhash_rotl32(h + f, 19);
-    h = h * 5 + 0xe6546b64;
-    h = farmhash_rotl32(h, 17) * FARMHASH_C1;
-    return h;
+        f += a4;
+        f = farmhash_rotl32(f, 19) + 113;
+        
+        iters = (len - 1) / 20;
+        do {
+            uint32_t a, b, c, d, e;
+            a = farmhash_fetch32(s);
+            b = farmhash_fetch32(s + 4);
+            c = farmhash_fetch32(s + 8);
+            d = farmhash_fetch32(s + 12);
+            e = farmhash_fetch32(s + 16);
+            h += a;
+            g += b;
+            f += c;
+            h = farmhash32_mur(d, h) + e;
+            g = farmhash32_mur(c, g) + a;
+            f = farmhash32_mur(b + e * FARMHASH_C1, f) + d;
+            f += g;
+            g += f;
+            s += 20;
+        } while (--iters != 0);
+        
+        g = farmhash_rotl32(g, 11) * FARMHASH_C1;
+        g = farmhash_rotl32(g, 17) * FARMHASH_C1;
+        f = farmhash_rotl32(f, 11) * FARMHASH_C1;
+        f = farmhash_rotl32(f, 17) * FARMHASH_C1;
+        h = farmhash_rotl32(h + g, 19);
+        h = h * 5 + 0xe6546b64;
+        h = farmhash_rotl32(h, 17) * FARMHASH_C1;
+        h = farmhash_rotl32(h + f, 19);
+        h = h * 5 + 0xe6546b64;
+        h = farmhash_rotl32(h, 17) * FARMHASH_C1;
+        return h;
+    }
 }
 
 static uint32_t
@@ -204,19 +202,6 @@ farmhash32_with_seed(const char *s, size_t len, uint32_t seed)
 }
 
 /* FarmHash64 implementation */
-static uint64_t
-farmhash64_len_16(const char *s, size_t len)
-{
-    if (len >= 8) {
-        uint64_t mul = FARMHASH_K2 + len * 2;
-        uint64_t a = farmhash_fetch64(s) + FARMHASH_K2;
-        uint64_t b = farmhash_fetch64(s + len - 8);
-        uint64_t c = farmhash_rotl64(b, 37) * mul + a;
-        uint64_t d = (farmhash_rotl64(a, 25) + b) * mul;
-        return farmhash_hash_len_16(c, d, mul);
-    }
-    return farmhash_shift_mix(farmhash_fetch32(s) * FARMHASH_K2 ^ len) * FARMHASH_K2;
-}
 
 static uint64_t
 farmhash64_len_0_to_16(const char *s, size_t len)
@@ -267,28 +252,32 @@ farmhash64_impl(const char *s, size_t len)
         return farmhash64_len_17_to_32(s, len);
     }
     if (len <= 64) {
-        uint64_t mul = FARMHASH_K2 + len * 2;
-        uint64_t a = farmhash_fetch64(s) * FARMHASH_K2;
-        uint64_t b = farmhash_fetch64(s + 8);
-        uint64_t c = farmhash_fetch64(s + len - 8) * mul;
-        uint64_t d = farmhash_fetch64(s + len - 16) * FARMHASH_K2;
-        uint64_t y = farmhash_rotl64(a + b, 43) + farmhash_rotl64(c, 30) + d;
-        uint64_t z = farmhash_hash_len_16(y, a + farmhash_rotl64(b + FARMHASH_K2, 18) + c, mul);
-        uint64_t e = farmhash_fetch64(s + 16) * mul;
-        uint64_t f = farmhash_fetch64(s + 24);
-        uint64_t g = (y + farmhash_fetch64(s + len - 32)) * mul;
-        uint64_t h = (z + farmhash_fetch64(s + len - 24)) * mul;
+        uint64_t mul, a, b, c, d, y, z, e, f, g, h;
+        mul = FARMHASH_K2 + len * 2;
+        a = farmhash_fetch64(s) * FARMHASH_K2;
+        b = farmhash_fetch64(s + 8);
+        c = farmhash_fetch64(s + len - 8) * mul;
+        d = farmhash_fetch64(s + len - 16) * FARMHASH_K2;
+        y = farmhash_rotl64(a + b, 43) + farmhash_rotl64(c, 30) + d;
+        z = farmhash_hash_len_16(y, a + farmhash_rotl64(b + FARMHASH_K2, 18) + c, mul);
+        e = farmhash_fetch64(s + 16) * mul;
+        f = farmhash_fetch64(s + 24);
+        g = (y + farmhash_fetch64(s + len - 32)) * mul;
+        h = (z + farmhash_fetch64(s + len - 24)) * mul;
         return farmhash_hash_len_16(farmhash_rotl64(e + f, 43) + farmhash_rotl64(g, 30) + h,
                                    e + farmhash_rotl64(f + a, 18) + g, mul);
     }
     
     /* For longer strings, use a simplified hash */
-    uint64_t x = farmhash_fetch64(s + len - 40);
-    uint64_t y = farmhash_fetch64(s + len - 16) + farmhash_fetch64(s + len - 56);
-    uint64_t z = farmhash_hash_len_16(farmhash_fetch64(s + len - 48) + len, 
-                                     farmhash_fetch64(s + len - 24), FARMHASH_K2);
-    return farmhash_hash_len_16(farmhash_rotl64(y, 37) * FARMHASH_K1 + x,
-                               farmhash_rotl64(z, 33) * FARMHASH_K1, FARMHASH_K1);
+    {
+        uint64_t x, y, z;
+        x = farmhash_fetch64(s + len - 40);
+        y = farmhash_fetch64(s + len - 16) + farmhash_fetch64(s + len - 56);
+        z = farmhash_hash_len_16(farmhash_fetch64(s + len - 48) + len, 
+                                         farmhash_fetch64(s + len - 24), FARMHASH_K2);
+        return farmhash_hash_len_16(farmhash_rotl64(y, 37) * FARMHASH_K1 + x,
+                                   farmhash_rotl64(z, 33) * FARMHASH_K1, FARMHASH_K1);
+    }
 }
 
 static uint64_t
