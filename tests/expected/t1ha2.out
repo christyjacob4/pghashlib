@@ -1,0 +1,174 @@
+-- Test basic hash functionality with text
+SELECT t1ha2('hello world');
+        t1ha2         
+----------------------
+ -3982934761687309927
+(1 row)
+
+-- Test hash with different text inputs
+SELECT t1ha2('test string');
+       t1ha2        
+--------------------
+ 673044971507390599
+(1 row)
+
+SELECT t1ha2('another test');
+        t1ha2        
+---------------------
+ 2841094725013662549
+(1 row)
+
+-- Test text input with custom seed
+SELECT t1ha2('hello world', 42);
+        t1ha2        
+---------------------
+ 1279792141742268733
+(1 row)
+
+SELECT t1ha2('hello world', 84);
+        t1ha2         
+----------------------
+ -1418659640464605650
+(1 row)
+
+-- Test bytea input
+SELECT t1ha2('hello world'::bytea);
+        t1ha2         
+----------------------
+ -3982934761687309927
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT t1ha2('hello world'::bytea, 42);
+        t1ha2        
+---------------------
+ 1279792141742268733
+(1 row)
+
+-- Test integer input
+SELECT t1ha2(12345);
+        t1ha2         
+----------------------
+ -8775173509347982182
+(1 row)
+
+SELECT t1ha2(-12345);
+       t1ha2        
+--------------------
+ 467022176890428590
+(1 row)
+
+-- Test integer input with custom seed
+SELECT t1ha2(12345, 42);
+        t1ha2         
+----------------------
+ -4032290342144274562
+(1 row)
+
+SELECT t1ha2(-12345, 84);
+        t1ha2        
+---------------------
+ 3329593101571562488
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT t1ha2('consistent test') = t1ha2('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT t1ha2('seed test', 1) != t1ha2('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT t1ha2('');
+ t1ha2 
+-------
+     0
+(1 row)
+
+-- Test single character
+SELECT t1ha2('a');
+        t1ha2        
+---------------------
+ 3263157828798237441
+(1 row)
+
+-- Test long string
+SELECT t1ha2('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+        t1ha2         
+----------------------
+ -4769530198040446370
+(1 row)
+
+-- Test various input lengths to test different code paths
+SELECT t1ha2('1234567');           -- 7 bytes
+        t1ha2        
+---------------------
+ -948926565314199635
+(1 row)
+
+SELECT t1ha2('12345678');          -- 8 bytes  
+        t1ha2        
+---------------------
+ -159888592605270680
+(1 row)
+
+SELECT t1ha2('123456789012345');   -- 15 bytes
+        t1ha2        
+---------------------
+ 7271032262454825205
+(1 row)
+
+SELECT t1ha2('1234567890123456');  -- 16 bytes
+        t1ha2         
+----------------------
+ -1909296071942659257
+(1 row)
+
+SELECT t1ha2('12345678901234567890123456789012'); -- 32 bytes
+        t1ha2        
+---------------------
+ 4693993531251190285
+(1 row)
+
+SELECT t1ha2('123456789012345678901234567890123'); -- 33 bytes
+        t1ha2        
+---------------------
+ -360699101541253897
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 't1ha2'
+ORDER BY proname, proargtypes;
+ proname | provolatile | proisstrict 
+---------+-------------+-------------
+ t1ha2   | i           | t
+ t1ha2   | i           | t
+ t1ha2   | i           | t
+ t1ha2   | i           | t
+ t1ha2   | i           | t
+ t1ha2   | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

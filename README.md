@@ -1,6 +1,6 @@
 # pghashlib
 
-pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, MetroHash64, MetroHash128, lookup2, lookup3be, and lookup3le algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, MetroHash64, MetroHash128, t1ha0, t1ha1, t1ha2, t1ha2_128, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -30,6 +30,10 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
    - [highwayhash256](#highwayhash256)
    - [metrohash64](#metrohash64)
    - [metrohash128](#metrohash128)
+   - [t1ha0](#t1ha0)
+   - [t1ha1](#t1ha1)
+   - [t1ha2](#t1ha2)
+   - [t1ha2_128](#t1ha2_128)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
    - [lookup3le](#lookup3le)
@@ -145,6 +149,10 @@ CREATE EXTENSION hashlib;
 - **HighwayHash256**: Google's SIMD-optimized keyed hash function (256-bit) - maximum collision resistance
 - **MetroHash64**: Fast alternative with excellent avalanche properties (64-bit) - algorithmically generated for performance
 - **MetroHash128**: Fast alternative with excellent avalanche properties (128-bit) - strong statistical profile similar to MD5
+- **t1ha0**: Fastest available t1ha variant - automatically selects optimal implementation for current CPU
+- **t1ha1**: Baseline portable t1ha hash - stable across architectures with reasonable quality
+- **t1ha2**: Recommended t1ha variant - good quality for checksums and hash tables, optimized for 64-bit systems
+- **t1ha2_128**: 128-bit version of t1ha2 - provides extended hash length for collision resistance
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
 - **lookup3le**: Bob Jenkins' lookup3 hash function with little-endian byte order - optimized for Intel/AMD systems
@@ -173,6 +181,10 @@ CREATE EXTENSION hashlib;
 | `highwayhash256` | `text`, `bytea`, `integer` | Yes (4 keys) | `bigint[]` | 256-bit HighwayHash - returns array of four 64-bit values |
 | `metrohash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit MetroHash - fast alternative with excellent avalanche properties |
 | `metrohash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit MetroHash - returns array of two 64-bit values |
+| `t1ha0` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit t1ha0 - fastest available t1ha variant for current CPU |
+| `t1ha1` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit t1ha1 - baseline portable hash with stable results |
+| `t1ha2` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit t1ha2 - recommended variant optimized for 64-bit systems |
+| `t1ha2_128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit t1ha2 - returns array of two 64-bit values |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 | `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
@@ -904,6 +916,172 @@ SELECT
 
 </details>
 
+### t1ha0
+
+t1ha0 is the fastest available variant of the t1ha (Fast Positive Hash) family. It automatically selects the optimal implementation for the current CPU architecture, prioritizing speed over consistent cross-platform results.
+
+**Signatures:**
+- `t1ha0(text)` → `bigint`
+- `t1ha0(text, bigint)` → `bigint`
+- `t1ha0(bytea)` → `bigint`
+- `t1ha0(bytea, bigint)` → `bigint`
+- `t1ha0(integer)` → `bigint`
+- `t1ha0(integer, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT t1ha0('hello world');
+-- Result: Ultra-fast 64-bit t1ha0 hash
+
+-- Hash text with custom seed
+SELECT t1ha0('hello world', 42);
+-- Result: Ultra-fast 64-bit t1ha0 hash with custom seed
+
+-- Hash bytea data
+SELECT t1ha0('hello world'::bytea);
+-- Result: Ultra-fast 64-bit t1ha0 hash of bytea data
+
+-- Hash integer values
+SELECT t1ha0(12345);
+-- Result: Ultra-fast 64-bit t1ha0 hash of integer
+```
+
+</details>
+
+### t1ha1
+
+t1ha1 is the baseline portable variant of t1ha, providing stable results across different architectures with reasonable quality for checksums and hash tables.
+
+**Signatures:**
+- `t1ha1(text)` → `bigint`
+- `t1ha1(text, bigint)` → `bigint`
+- `t1ha1(bytea)` → `bigint`
+- `t1ha1(bytea, bigint)` → `bigint`
+- `t1ha1(integer)` → `bigint`
+- `t1ha1(integer, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT t1ha1('hello world');
+-- Result: Portable 64-bit t1ha1 hash
+
+-- Hash text with custom seed
+SELECT t1ha1('hello world', 42);
+-- Result: Portable 64-bit t1ha1 hash with custom seed
+
+-- Hash bytea data
+SELECT t1ha1('hello world'::bytea);
+-- Result: Portable 64-bit t1ha1 hash of bytea data
+
+-- Hash integer values
+SELECT t1ha1(12345);
+-- Result: Portable 64-bit t1ha1 hash of integer
+```
+
+</details>
+
+### t1ha2
+
+t1ha2 is the recommended variant of t1ha, providing good quality for checksums and hash tables while being optimized for 64-bit systems. It offers the best balance of speed and quality.
+
+**Signatures:**
+- `t1ha2(text)` → `bigint`
+- `t1ha2(text, bigint)` → `bigint`
+- `t1ha2(bytea)` → `bigint`
+- `t1ha2(bytea, bigint)` → `bigint`
+- `t1ha2(integer)` → `bigint`
+- `t1ha2(integer, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT t1ha2('hello world');
+-- Result: High-quality 64-bit t1ha2 hash
+
+-- Hash text with custom seed
+SELECT t1ha2('hello world', 42);
+-- Result: High-quality 64-bit t1ha2 hash with custom seed
+
+-- Hash bytea data
+SELECT t1ha2('hello world'::bytea);
+-- Result: High-quality 64-bit t1ha2 hash of bytea data
+
+-- Hash integer values
+SELECT t1ha2(12345);
+-- Result: High-quality 64-bit t1ha2 hash of integer
+```
+
+</details>
+
+### t1ha2_128
+
+t1ha2_128 is the 128-bit version of t1ha2, providing extended hash length for applications requiring higher collision resistance while maintaining the performance characteristics of t1ha2.
+
+**Signatures:**
+- `t1ha2_128(text)` → `bigint[]`
+- `t1ha2_128(text, bigint)` → `bigint[]`
+- `t1ha2_128(bytea)` → `bigint[]`
+- `t1ha2_128(bytea, bigint)` → `bigint[]`
+- `t1ha2_128(integer)` → `bigint[]`
+- `t1ha2_128(integer, bigint)` → `bigint[]`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+**Return Value:**
+Returns an array of two `bigint` values representing the 128-bit hash:
+- `[1]`: First 64 bits of the hash
+- `[2]`: Second 64 bits of the hash
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT t1ha2_128('hello world');
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash text with custom seed
+SELECT t1ha2_128('hello world', 42);
+-- Result: High-quality 128-bit t1ha2 hash with custom seed
+
+-- Hash bytea data
+SELECT t1ha2_128('hello world'::bytea);
+-- Result: High-quality 128-bit t1ha2 hash of bytea data
+
+-- Hash integer values
+SELECT t1ha2_128(12345);
+-- Result: High-quality 128-bit t1ha2 hash of integer
+
+-- Access individual parts of the 128-bit hash
+SELECT 
+    (t1ha2_128('hello world'))[1] AS first_64_bits,
+    (t1ha2_128('hello world'))[2] AS second_64_bits;
+```
+
+</details>
+
 ### lookup2
 
 lookup2 is Bob Jenkins' hash function, designed for fast hashing with good distribution properties.
@@ -1244,7 +1422,7 @@ Additional non-cryptographic hash functions planned for future releases:
 
 ### **Medium Priority**
 - [x] **MetroHash** - Fast alternative with good avalanche properties
-- [ ] **t1ha** - Fast Positive Hash optimized for x86-64
+- [x] **t1ha** - Fast Positive Hash optimized for x86-64
 - [ ] **wyhash** - Simple, fast implementation
 
 ### **Specialized**

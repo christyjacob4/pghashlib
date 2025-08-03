@@ -702,3 +702,147 @@ CREATE OR REPLACE FUNCTION metrohash128(integer, bigint)
 RETURNS bigint[]
 AS 'MODULE_PATHNAME', 'metrohash128_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha0 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha0(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha0_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha0 function for text with custom seed
+CREATE OR REPLACE FUNCTION t1ha0(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha0_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha0 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha0(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha0_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha0 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION t1ha0(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha0_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha0 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha0(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha0_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha0 function for integer with custom seed
+CREATE OR REPLACE FUNCTION t1ha0(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha0_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha1 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha1(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha1_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha1 function for text with custom seed
+CREATE OR REPLACE FUNCTION t1ha1(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha1_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha1 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha1(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha1_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha1 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION t1ha1(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha1_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha1 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha1(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha1_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha1 function for integer with custom seed
+CREATE OR REPLACE FUNCTION t1ha1(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha1_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha2(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha2_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2 function for text with custom seed
+CREATE OR REPLACE FUNCTION t1ha2(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha2_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha2(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha2_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION t1ha2(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha2_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION t1ha2(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha2_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2 function for integer with custom seed
+CREATE OR REPLACE FUNCTION t1ha2(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 't1ha2_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2_128 function for text (default seed = 0) - returns array of two bigints
+CREATE OR REPLACE FUNCTION t1ha2_128(text)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 't1ha2_128_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2_128 function for text with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION t1ha2_128(text, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 't1ha2_128_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2_128 function for bytea (default seed = 0) - returns array of two bigints
+CREATE OR REPLACE FUNCTION t1ha2_128(bytea)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 't1ha2_128_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2_128 function for bytea with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION t1ha2_128(bytea, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 't1ha2_128_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2_128 function for integer (default seed = 0) - returns array of two bigints
+CREATE OR REPLACE FUNCTION t1ha2_128(integer)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 't1ha2_128_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- t1ha2_128 function for integer with custom seed - returns array of two bigints
+CREATE OR REPLACE FUNCTION t1ha2_128(integer, bigint)
+RETURNS bigint[]
+AS 'MODULE_PATHNAME', 't1ha2_128_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
