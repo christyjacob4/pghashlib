@@ -1,0 +1,168 @@
+-- Test basic hash functionality with text
+SELECT xxhash3_64('hello world');
+      xxhash3_64      
+----------------------
+ -8649494305336177015
+(1 row)
+
+-- Test hash with different text inputs
+SELECT xxhash3_64('test string');
+      xxhash3_64      
+----------------------
+ -4870933233882496366
+(1 row)
+
+SELECT xxhash3_64('another test');
+      xxhash3_64      
+----------------------
+ -5640707456741257213
+(1 row)
+
+-- Test text input with custom seed
+SELECT xxhash3_64('hello world', 42);
+      xxhash3_64      
+----------------------
+ -8504170746610994777
+(1 row)
+
+SELECT xxhash3_64('hello world', 123);
+     xxhash3_64      
+---------------------
+ 4585974722266331206
+(1 row)
+
+-- Test bytea input  
+SELECT xxhash3_64('hello world'::bytea);
+      xxhash3_64      
+----------------------
+ -8649494305336177015
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT xxhash3_64('hello world'::bytea, 42);
+      xxhash3_64      
+----------------------
+ -8504170746610994777
+(1 row)
+
+-- Test integer input
+SELECT xxhash3_64(12345);
+     xxhash3_64      
+---------------------
+ 6181486284233530907
+(1 row)
+
+SELECT xxhash3_64(-12345);
+     xxhash3_64      
+---------------------
+ 5390640081453036246
+(1 row)
+
+-- Test integer input with custom seed
+SELECT xxhash3_64(12345, 42);
+     xxhash3_64      
+---------------------
+ 7371111772259320289
+(1 row)
+
+SELECT xxhash3_64(-12345, 123);
+     xxhash3_64      
+---------------------
+ 8124192886619112466
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT xxhash3_64('consistent test') = xxhash3_64('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT xxhash3_64('seed test', 1) != xxhash3_64('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT xxhash3_64('');
+     xxhash3_64      
+---------------------
+ 3244421341483603138
+(1 row)
+
+-- Test single character
+SELECT xxhash3_64('a');
+      xxhash3_64      
+----------------------
+ -1817709641818812897
+(1 row)
+
+-- Test long string
+SELECT xxhash3_64('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+      xxhash3_64      
+----------------------
+ -1432240645966723158
+(1 row)
+
+-- Test different input sizes to verify different algorithm paths
+SELECT xxhash3_64('a');           -- 1 byte (small)
+      xxhash3_64      
+----------------------
+ -1817709641818812897
+(1 row)
+
+SELECT xxhash3_64('hello');        -- 5 bytes (small)
+      xxhash3_64      
+----------------------
+ -7685981735718036227
+(1 row)
+
+SELECT xxhash3_64('hello world!'); -- 12 bytes (small)
+     xxhash3_64      
+---------------------
+ 1081866848449896561
+(1 row)
+
+SELECT xxhash3_64('this is a test string with more than sixteen characters'); -- medium size
+      xxhash3_64      
+----------------------
+ -4505929252409290999
+(1 row)
+
+SELECT xxhash3_64(repeat('x', 250)); -- large size (>240 bytes)
+     xxhash3_64      
+---------------------
+ 3905492404021638596
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'xxhash3_64'
+ORDER BY proname, proargtypes;
+  proname   | provolatile | proisstrict 
+------------+-------------+-------------
+ xxhash3_64 | i           | t
+ xxhash3_64 | i           | t
+ xxhash3_64 | i           | t
+ xxhash3_64 | i           | t
+ xxhash3_64 | i           | t
+ xxhash3_64 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
