@@ -90,8 +90,9 @@ metrohash64(const char *buffer, size_t length, uint64_t seed)
     
     if ((end - ptr) >= 16)
     {
-        uint64_t v0 = hash + (metro_fetch64(ptr) * k2_64); ptr += 8; v0 = metro_rotate_right(v0, 29) * k3_64;
-        uint64_t v1 = hash + (metro_fetch64(ptr) * k2_64); ptr += 8; v1 = metro_rotate_right(v1, 29) * k3_64;
+        uint64_t v0, v1;
+        v0 = hash + (metro_fetch64(ptr) * k2_64); ptr += 8; v0 = metro_rotate_right(v0, 29) * k3_64;
+        v1 = hash + (metro_fetch64(ptr) * k2_64); ptr += 8; v1 = metro_rotate_right(v1, 29) * k3_64;
         v0 ^= metro_rotate_right(v0 * k0_64, 21) + v1;
         v1 ^= metro_rotate_right(v1 * k3_64, 21) + v0;
         hash += v1;
