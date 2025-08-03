@@ -1,6 +1,6 @@
 # pghashlib
 
-pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, lookup2, lookup3be, and lookup3le algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -19,6 +19,8 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
    - [cityhash64](#cityhash64)
    - [cityhash128](#cityhash128)
    - [siphash24](#siphash24)
+   - [spookyhash64](#spookyhash64)
+   - [spookyhash128](#spookyhash128)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
    - [lookup3le](#lookup3le)
@@ -123,6 +125,7 @@ CREATE EXTENSION hashlib;
 - **CityHash64**: High-performance 64-bit hash function from Google
 - **CityHash128**: High-performance 128-bit hash function from Google
 - **SipHash-2-4**: Cryptographic hash function designed for hash table protection against hash flooding attacks
+- **SpookyHash**: Fast 128-bit hash function by Bob Jenkins, optimized for 64-bit processors with excellent avalanche properties
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
 - **lookup3le**: Bob Jenkins' lookup3 hash function with little-endian byte order - optimized for Intel/AMD systems
@@ -140,6 +143,8 @@ CREATE EXTENSION hashlib;
 | `cityhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit CityHash - high-performance hash by Google |
 | `cityhash128` | `text`, `bytea`, `integer` | Yes | `bigint[]` | 128-bit CityHash - returns array of two 64-bit values |
 | `siphash24` | `text`, `bytea`, `integer` | Yes (2 seeds) | `bigint` | 64-bit SipHash-2-4 - cryptographic hash function |
+| `spookyhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit SpookyHash - fast hash optimized for 64-bit processors |
+| `spookyhash128` | `text`, `bytea`, `integer` | Yes (2 seeds) | `bigint[]` | 128-bit SpookyHash - returns array of two 64-bit values |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 | `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
@@ -383,6 +388,111 @@ SELECT siphash24(12345);
 -- Hash integer with custom key
 SELECT siphash24(12345, 42, 84);
 -- Result: Secure hash with custom key
+```
+
+</details>
+
+### spookyhash64
+
+SpookyHash64 is a 64-bit hash function by Bob Jenkins, optimized for speed on 64-bit processors with excellent avalanche properties.
+
+**Signatures:**
+- `spookyhash64(text)` → `bigint`
+- `spookyhash64(text, bigint)` → `bigint`
+- `spookyhash64(bytea)` → `bigint`
+- `spookyhash64(bytea, bigint)` → `bigint`
+- `spookyhash64(integer)` → `bigint`
+- `spookyhash64(integer, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT spookyhash64('hello world');
+-- Result: Fast 64-bit hash
+
+-- Hash text with custom seed
+SELECT spookyhash64('hello world', 42);
+-- Result: Fast 64-bit hash with custom seed
+
+-- Hash bytea data
+SELECT spookyhash64('hello world'::bytea);
+-- Result: Fast 64-bit hash of bytea data
+
+-- Hash bytea with custom seed
+SELECT spookyhash64('hello world'::bytea, 42);
+-- Result: Fast 64-bit hash with custom seed
+
+-- Hash integer values
+SELECT spookyhash64(12345);
+-- Result: Fast 64-bit hash of integer
+
+-- Hash integer with custom seed
+SELECT spookyhash64(12345, 42);
+-- Result: Fast 64-bit hash with custom seed
+```
+
+</details>
+
+### spookyhash128
+
+SpookyHash128 is a 128-bit hash function by Bob Jenkins, providing stronger hash distribution with two 64-bit output values.
+
+**Signatures:**
+- `spookyhash128(text)` → `bigint[]`
+- `spookyhash128(text, bigint, bigint)` → `bigint[]`
+- `spookyhash128(bytea)` → `bigint[]`
+- `spookyhash128(bytea, bigint, bigint)` → `bigint[]`
+- `spookyhash128(integer)` → `bigint[]`
+- `spookyhash128(integer, bigint, bigint)` → `bigint[]`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): First 64-bit seed value
+- Third parameter (optional): Second 64-bit seed value
+
+**Return Value:**
+Returns an array of two `bigint` values representing the 128-bit hash:
+- `[1]`: First 64 bits of the hash
+- `[2]`: Second 64 bits of the hash
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT spookyhash128('hello world');
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash text with custom seeds (two 64-bit values)
+SELECT spookyhash128('hello world', 42, 84);
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash bytea data
+SELECT spookyhash128('hello world'::bytea);
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash bytea with custom seeds
+SELECT spookyhash128('hello world'::bytea, 42, 84);
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash integer values
+SELECT spookyhash128(12345);
+-- Result: {first_64_bits, second_64_bits}
+
+-- Hash integer with custom seeds
+SELECT spookyhash128(12345, 42, 84);
+-- Result: {first_64_bits, second_64_bits}
+
+-- Access individual parts of the 128-bit hash
+SELECT 
+    (spookyhash128('hello world'))[1] AS first_64_bits,
+    (spookyhash128('hello world'))[2] AS second_64_bits;
 ```
 
 </details>
@@ -631,6 +741,7 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 - MurmurHash3 algorithm by Austin Appleby
 - CityHash algorithm by Google Inc.
 - SipHash-2-4 algorithm by Jean-Philippe Aumasson and Daniel J. Bernstein
+- SpookyHash algorithm by Bob Jenkins
 - lookup2 and lookup3be algorithms by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support
