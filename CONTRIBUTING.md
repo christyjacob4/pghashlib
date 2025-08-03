@@ -36,11 +36,11 @@ To add a new hash function (e.g., SHA-256):
 # Run all tests
 make installcheck
 
-# Run specific test
-psql -d postgres -f tests/sql/murmur.sql
+# Run specific test (ensure extension is loaded first)
+psql -d postgres -c "CREATE EXTENSION IF NOT EXISTS hashlib;" -f tests/sql/murmur.sql
 
 # Docker-based testing
-docker compose exec postgres make test
+docker compose exec postgres bash -c "cd /tmp/pghashlib && make installcheck"
 ```
 
 ### Code Style
@@ -74,7 +74,7 @@ PostgreSQL extensions can be distributed through several channels:
 #### 2. **Operating System Packages**
 - Ubuntu/Debian: `.deb` packages via apt
 - CentOS/RHEL: `.rpm` packages via yum/dnf
-- Example: `sudo apt-get install postgresql-contrib-hashlib`
+- Example: `sudo apt-get install postgresql-contrib` (standard contrib package)
 
 #### 3. **GitHub Releases**
 - Download source archives from GitHub releases
@@ -101,11 +101,11 @@ pgxn load -d mydatabase hashlib
 
 #### Method 2: Package Manager
 ```bash
-# Ubuntu/Debian
-sudo apt-get install postgresql-contrib-hashlib
+# Ubuntu/Debian (Note: Package may not be available - use source installation)
+# sudo apt-get install postgresql-contrib-hashlib
 
-# CentOS/RHEL
-sudo yum install postgresql-hashlib
+# CentOS/RHEL (Note: Package may not be available - use source installation)  
+# sudo yum install postgresql-hashlib
 ```
 
 #### Method 3: From Source
@@ -215,8 +215,8 @@ When contributing new hash functions:
 
 ## Getting Help
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/yourusername/pghashlib/issues)
-- **GitHub Discussions**: [Ask questions and discuss ideas](https://github.com/yourusername/pghashlib/discussions)
+- **GitHub Issues**: [Report bugs and request features](https://github.com/christyjacob4/pghashlib/issues)
+- **GitHub Discussions**: [Ask questions and discuss ideas](https://github.com/christyjacob4/pghashlib/discussions)
 - **PostgreSQL Community**: [PostgreSQL Mailing Lists](https://www.postgresql.org/list/)
 
 ## Development Setup
@@ -228,7 +228,7 @@ When contributing new hash functions:
 docker compose up -d
 
 # Run tests
-docker compose exec postgres make test
+docker compose exec postgres bash -c "cd /tmp/pghashlib && make installcheck"
 
 # Interactive development
 docker compose exec postgres bash

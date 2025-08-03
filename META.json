@@ -1,7 +1,7 @@
 {
    "name": "hashlib",
    "abstract": "High-performance hash functions for PostgreSQL",
-   "description": "A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, with plans to add more hash algorithms like SHA-256, Blake3, and CityHash.",
+   "description": "A PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, HighwayHash64, HighwayHash128, HighwayHash256, lookup2, lookup3be, and lookup3le algorithms.",
    "version": "0.1.0",
    "maintainer": [
       "Your Name <your.email@example.com>"
@@ -24,14 +24,14 @@
    },
    "resources": {
       "bugtracker": {
-         "web": "https://github.com/yourusername/pghashlib/issues"
+         "web": "https://github.com/christyjacob4/pghashlib/issues"
       },
       "repository": {
-         "url": "git://github.com/yourusername/pghashlib.git",
-         "web": "https://github.com/yourusername/pghashlib",
+         "url": "git://github.com/christyjacob4/pghashlib.git",
+         "web": "https://github.com/christyjacob4/pghashlib",
          "type": "git"
       },
-      "homepage": "https://github.com/yourusername/pghashlib"
+      "homepage": "https://github.com/christyjacob4/pghashlib"
    },
    "generated_by": "hand-written",
    "meta-spec": {
@@ -42,6 +42,15 @@
       "hash function",
       "murmur",
       "murmurhash3",
+      "cityhash",
+      "siphash",
+      "spookyhash",
+      "xxhash",
+      "farmhash",
+      "highwayhash",
+      "lookup2",
+      "lookup3",
+      "crc32",
       "hash",
       "performance",
       "data processing",
