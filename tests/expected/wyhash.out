@@ -47,54 +47,54 @@ SELECT wyhash('hello world'::bytea, 42);
 
 -- Test integer input
 SELECT wyhash(12345);
-        wyhash        
-----------------------
- -7281976281920181492
+       wyhash        
+---------------------
+ 1969482105660887696
 (1 row)
 
 SELECT wyhash(-12345);
-        wyhash        
-----------------------
- -7281976281920181492
+       wyhash        
+---------------------
+ 1230845017666037457
 (1 row)
 
 -- Test integer input with custom seed
 SELECT wyhash(12345, 42);
-        wyhash        
-----------------------
- -3200717158655706313
+       wyhash        
+---------------------
+ 6508754037914265990
 (1 row)
 
 SELECT wyhash(-12345, 84);
-       wyhash       
---------------------
- 725163237900096566
+       wyhash        
+---------------------
+ 8963933611427731549
 (1 row)
 
 -- Test bigint input
 SELECT wyhash(123456789012345::bigint);
-       wyhash        
----------------------
- 1792443220689638201
+        wyhash        
+----------------------
+ -7195712728423263192
 (1 row)
 
 SELECT wyhash(-123456789012345::bigint);
        wyhash        
 ---------------------
- 1792443220689638201
+ 5926124446795126730
 (1 row)
 
 -- Test bigint input with custom seed
 SELECT wyhash(123456789012345::bigint, 42);
-       wyhash        
----------------------
- 4605358307667765892
+        wyhash        
+----------------------
+ -4278712323468138313
 (1 row)
 
 SELECT wyhash(-123456789012345::bigint, 84);
-       wyhash        
----------------------
- 2209537139147064014
+        wyhash        
+----------------------
+ -2788104773819193734
 (1 row)
 
 -- Test consistency (same input should give same hash)
@@ -190,21 +190,21 @@ SELECT wyhash(0::bigint);
 
 -- Test maximum values
 SELECT wyhash(2147483647);          -- max int4
-        wyhash        
-----------------------
- -7281976281920181492
+       wyhash        
+---------------------
+ 6285647321812559677
 (1 row)
 
 SELECT wyhash(-2147483648);         -- min int4
         wyhash        
 ----------------------
- -7281976281920181492
+ -6471897052436646722
 (1 row)
 
 SELECT wyhash(9223372036854775807::bigint);  -- max int8
        wyhash        
 ---------------------
- 1792443220689638201
+ 6574888091236019317
 (1 row)
 
 SELECT wyhash(-9223372036854775808::bigint); -- min int8
