@@ -1,0 +1,183 @@
+-- Test basic hash functionality with text
+SELECT metrohash128('hello world');
+               metrohash128                
+-------------------------------------------
+ {5539676306051081294,-211511561521489773}
+(1 row)
+
+-- Test hash with different text inputs
+SELECT metrohash128('test string');
+                metrohash128                
+--------------------------------------------
+ {2867164424083403350,-2068762077212700892}
+(1 row)
+
+SELECT metrohash128('another test');
+                metrohash128                
+--------------------------------------------
+ {6391236520680785136,-6343274053309863831}
+(1 row)
+
+-- Test text input with custom seed
+SELECT metrohash128('hello world', 42);
+               metrohash128                
+-------------------------------------------
+ {-265207113926083562,3206965810759380399}
+(1 row)
+
+SELECT metrohash128('hello world', 84);
+                metrohash128                
+--------------------------------------------
+ {5952918644075992962,-5633122839669334084}
+(1 row)
+
+-- Test bytea input
+SELECT metrohash128('hello world'::bytea);
+               metrohash128                
+-------------------------------------------
+ {5539676306051081294,-211511561521489773}
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT metrohash128('hello world'::bytea, 42);
+               metrohash128                
+-------------------------------------------
+ {-265207113926083562,3206965810759380399}
+(1 row)
+
+-- Test integer input
+SELECT metrohash128(12345);
+               metrohash128                
+-------------------------------------------
+ {1944286669440525961,-143845764251039547}
+(1 row)
+
+SELECT metrohash128(-12345);
+                metrohash128                 
+---------------------------------------------
+ {-4194983025153319077,-5919860008905785956}
+(1 row)
+
+-- Test integer input with custom seed
+SELECT metrohash128(12345, 42);
+               metrohash128                
+-------------------------------------------
+ {2287182691321510549,2174927315948623647}
+(1 row)
+
+SELECT metrohash128(-12345, 84);
+                metrohash128                
+--------------------------------------------
+ {8028416945232418619,-2420392937483077275}
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT metrohash128('consistent test') = metrohash128('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT metrohash128('seed test', 1) != metrohash128('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT metrohash128('');
+                metrohash128                
+--------------------------------------------
+ {-6835259074880806961,3083149393381871730}
+(1 row)
+
+-- Test single character
+SELECT metrohash128('a');
+               metrohash128                
+-------------------------------------------
+ {5243560732999946684,2266999717208749262}
+(1 row)
+
+-- Test long string
+SELECT metrohash128('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+                metrohash128                
+--------------------------------------------
+ {-6899433072658441830,1690735078462225252}
+(1 row)
+
+-- Test various input lengths to test different code paths
+SELECT metrohash128('1234567');           -- 7 bytes
+              metrohash128               
+-----------------------------------------
+ {854637892631321821,449995297343789994}
+(1 row)
+
+SELECT metrohash128('12345678');          -- 8 bytes  
+                metrohash128                
+--------------------------------------------
+ {5485289472643097169,-8805985333443190633}
+(1 row)
+
+SELECT metrohash128('123456789012345');   -- 15 bytes
+                metrohash128                
+--------------------------------------------
+ {4586312468676736186,-5705528884789225075}
+(1 row)
+
+SELECT metrohash128('1234567890123456');  -- 16 bytes
+                metrohash128                
+--------------------------------------------
+ {-1919193336374137824,5419602204652319504}
+(1 row)
+
+SELECT metrohash128('12345678901234567890123456789012'); -- 32 bytes
+               metrohash128                
+-------------------------------------------
+ {7065548682617181188,6360859322748458887}
+(1 row)
+
+SELECT metrohash128('123456789012345678901234567890123'); -- 33 bytes
+               metrohash128                
+-------------------------------------------
+ {4135018508032261800,4167712118064405281}
+(1 row)
+
+-- Test array access (128-bit hash returns array of two bigints)
+SELECT 
+    (metrohash128('hello world'))[1] AS first_64_bits,
+    (metrohash128('hello world'))[2] AS second_64_bits;
+    first_64_bits    |   second_64_bits    
+---------------------+---------------------
+ 5539676306051081294 | -211511561521489773
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'metrohash128'
+ORDER BY proname, proargtypes;
+   proname    | provolatile | proisstrict 
+--------------+-------------+-------------
+ metrohash128 | i           | t
+ metrohash128 | i           | t
+ metrohash128 | i           | t
+ metrohash128 | i           | t
+ metrohash128 | i           | t
+ metrohash128 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

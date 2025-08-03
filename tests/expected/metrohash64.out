@@ -1,0 +1,174 @@
+-- Test basic hash functionality with text
+SELECT metrohash64('hello world');
+     metrohash64     
+---------------------
+ 2508907084450611607
+(1 row)
+
+-- Test hash with different text inputs
+SELECT metrohash64('test string');
+     metrohash64      
+----------------------
+ -8233712680553271979
+(1 row)
+
+SELECT metrohash64('another test');
+     metrohash64      
+----------------------
+ -4419052628547777987
+(1 row)
+
+-- Test text input with custom seed
+SELECT metrohash64('hello world', 42);
+     metrohash64     
+---------------------
+ 7755189595014100508
+(1 row)
+
+SELECT metrohash64('hello world', 84);
+     metrohash64      
+----------------------
+ -8178393335363482941
+(1 row)
+
+-- Test bytea input
+SELECT metrohash64('hello world'::bytea);
+     metrohash64     
+---------------------
+ 2508907084450611607
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT metrohash64('hello world'::bytea, 42);
+     metrohash64     
+---------------------
+ 7755189595014100508
+(1 row)
+
+-- Test integer input
+SELECT metrohash64(12345);
+     metrohash64     
+---------------------
+ 4389253451261894949
+(1 row)
+
+SELECT metrohash64(-12345);
+     metrohash64      
+----------------------
+ -6295553710775753431
+(1 row)
+
+-- Test integer input with custom seed
+SELECT metrohash64(12345, 42);
+     metrohash64      
+----------------------
+ -8617979156419833338
+(1 row)
+
+SELECT metrohash64(-12345, 84);
+     metrohash64      
+----------------------
+ -8831244077458593659
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT metrohash64('consistent test') = metrohash64('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT metrohash64('seed test', 1) != metrohash64('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT metrohash64('');
+     metrohash64     
+---------------------
+ 8097384203561113213
+(1 row)
+
+-- Test single character
+SELECT metrohash64('a');
+     metrohash64      
+----------------------
+ -5805381625427317813
+(1 row)
+
+-- Test long string
+SELECT metrohash64('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+     metrohash64      
+----------------------
+ -2667174807005582973
+(1 row)
+
+-- Test various input lengths to test different code paths
+SELECT metrohash64('1234567');           -- 7 bytes
+     metrohash64     
+---------------------
+ 6915207505515058674
+(1 row)
+
+SELECT metrohash64('12345678');          -- 8 bytes  
+     metrohash64      
+----------------------
+ -5135296551170795364
+(1 row)
+
+SELECT metrohash64('123456789012345');   -- 15 bytes
+    metrohash64     
+--------------------
+ 922952863477679392
+(1 row)
+
+SELECT metrohash64('1234567890123456');  -- 16 bytes
+     metrohash64      
+----------------------
+ -4382177149408497113
+(1 row)
+
+SELECT metrohash64('12345678901234567890123456789012'); -- 32 bytes
+     metrohash64      
+----------------------
+ -4062487706759931237
+(1 row)
+
+SELECT metrohash64('123456789012345678901234567890123'); -- 33 bytes
+     metrohash64     
+---------------------
+ -136095983909947948
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'metrohash64'
+ORDER BY proname, proargtypes;
+   proname   | provolatile | proisstrict 
+-------------+-------------+-------------
+ metrohash64 | i           | t
+ metrohash64 | i           | t
+ metrohash64 | i           | t
+ metrohash64 | i           | t
+ metrohash64 | i           | t
+ metrohash64 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
