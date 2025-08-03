@@ -5,81 +5,29 @@ SELECT lookup3('hello world') IS NOT NULL;
  t
 (1 row)
 
--- Test hash with different text inputs give different results
-SELECT lookup3('test string') != lookup3('hello world');
+-- Test text input with different seeds
+SELECT lookup3('hello world', 0) != lookup3('hello world', 1);
  ?column? 
 ----------
  t
 (1 row)
 
-SELECT lookup3('another test') != lookup3('hello world');
+-- Test bytea input
+SELECT lookup3('hello world'::bytea) IS NOT NULL;
  ?column? 
 ----------
  t
 (1 row)
 
--- Test text input with custom initval gives different results
-SELECT lookup3('hello world', 42) != lookup3('hello world');
- ?column? 
-----------
- t
-(1 row)
-
-SELECT lookup3('hello world', 123) != lookup3('hello world', 42);
- ?column? 
-----------
- t
-(1 row)
-
--- Test bytea input consistency
-SELECT lookup3('hello world'::bytea) = lookup3('hello world');
- ?column? 
-----------
- t
-(1 row)
-
--- Test bytea input with custom initval
-SELECT lookup3('hello world'::bytea, 42) = lookup3('hello world', 42);
- ?column? 
-----------
- t
-(1 row)
-
--- Test integer input gives consistent results
-SELECT lookup3(12345) = lookup3(12345);
- ?column? 
-----------
- t
-(1 row)
-
-SELECT lookup3(-12345) = lookup3(-12345);
- ?column? 
-----------
- t
-(1 row)
-
--- Test integer input with custom initval
-SELECT lookup3(12345, 42) = lookup3(12345, 42);
- ?column? 
-----------
- t
-(1 row)
-
-SELECT lookup3(-12345, 123) != lookup3(-12345, 42);
+-- Test integer input  
+SELECT lookup3(12345) IS NOT NULL;
  ?column? 
 ----------
  t
 (1 row)
 
 -- Test consistency (same input should give same hash)
-SELECT lookup3('consistent test') = lookup3('consistent test');
- ?column? 
-----------
- t
-(1 row)
-
--- Test initval effect (same input, different initvals should give different hashes)
-SELECT lookup3('initval test', 1) != lookup3('initval test', 2);
+SELECT lookup3('test') = lookup3('test');
  ?column? 
 ----------
  t

@@ -411,16 +411,12 @@ static uint32_t hashlittle( const void *key, size_t length, uint32_t initval)
 }
 
 /*
- * Standard lookup3 hash function that automatically detects endianness
- * and uses the appropriate variant for optimal performance.
+ * Standard lookup3 hash function - always uses little-endian variant
+ * for consistent results across platforms
  */
 static uint32_t lookup3_hash(const void *key, size_t length, uint32_t initval)
 {
-    if (HASH_LITTLE_ENDIAN) {
-        return hashlittle(key, length, initval);
-    } else {
-        return hashbig(key, length, initval);
-    }
+    return hashlittle(key, length, initval);
 }
 
 /* PostgreSQL function declarations */
