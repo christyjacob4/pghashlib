@@ -1,0 +1,183 @@
+-- Test basic hash functionality with text
+SELECT t1ha2_128('hello world');
+                 t1ha2_128                  
+--------------------------------------------
+ {1462807296381820210,-5445742058069130137}
+(1 row)
+
+-- Test hash with different text inputs
+SELECT t1ha2_128('test string');
+                 t1ha2_128                  
+--------------------------------------------
+ {6953955815043936881,-6280910843536546282}
+(1 row)
+
+SELECT t1ha2_128('another test');
+                t1ha2_128                
+-----------------------------------------
+ {47090421500347540,2794004303513315009}
+(1 row)
+
+-- Test text input with custom seed
+SELECT t1ha2_128('hello world', 42);
+                 t1ha2_128                 
+-------------------------------------------
+ {-575494176204213404,1855286317946482137}
+(1 row)
+
+SELECT t1ha2_128('hello world', 84);
+                 t1ha2_128                  
+--------------------------------------------
+ {-6911933389925174446,5493273749460568796}
+(1 row)
+
+-- Test bytea input
+SELECT t1ha2_128('hello world'::bytea);
+                 t1ha2_128                  
+--------------------------------------------
+ {1462807296381820210,-5445742058069130137}
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT t1ha2_128('hello world'::bytea, 42);
+                 t1ha2_128                 
+-------------------------------------------
+ {-575494176204213404,1855286317946482137}
+(1 row)
+
+-- Test integer input
+SELECT t1ha2_128(12345);
+                  t1ha2_128                  
+---------------------------------------------
+ {-3887107517173674402,-4888065992174307780}
+(1 row)
+
+SELECT t1ha2_128(-12345);
+                t1ha2_128                 
+------------------------------------------
+ {901496422677154122,-434474245786725532}
+(1 row)
+
+-- Test integer input with custom seed
+SELECT t1ha2_128(12345, 42);
+                  t1ha2_128                  
+---------------------------------------------
+ {-1836157354982897709,-2196132987161376853}
+(1 row)
+
+SELECT t1ha2_128(-12345, 84);
+                  t1ha2_128                  
+---------------------------------------------
+ {-6004758575032658289,-9112392397105330839}
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT t1ha2_128('consistent test') = t1ha2_128('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT t1ha2_128('seed test', 1) != t1ha2_128('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT t1ha2_128('');
+ t1ha2_128 
+-----------
+ {0,0}
+(1 row)
+
+-- Test single character
+SELECT t1ha2_128('a');
+                 t1ha2_128                  
+--------------------------------------------
+ {6500011561861736455,-3236853733063499014}
+(1 row)
+
+-- Test long string
+SELECT t1ha2_128('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+                 t1ha2_128                 
+-------------------------------------------
+ {6020166660828880800,7657047214840224446}
+(1 row)
+
+-- Test various input lengths to test different code paths
+SELECT t1ha2_128('1234567');           -- 7 bytes
+                 t1ha2_128                 
+-------------------------------------------
+ {713918099559126361,-1662844664873325996}
+(1 row)
+
+SELECT t1ha2_128('12345678');          -- 8 bytes  
+                 t1ha2_128                  
+--------------------------------------------
+ {6631516098274171640,-6791404690879442320}
+(1 row)
+
+SELECT t1ha2_128('123456789012345');   -- 15 bytes
+                 t1ha2_128                 
+-------------------------------------------
+ {3028575210186940053,4242457052267885152}
+(1 row)
+
+SELECT t1ha2_128('1234567890123456');  -- 16 bytes
+                 t1ha2_128                 
+-------------------------------------------
+ {8535889593104632333,8001558408662260026}
+(1 row)
+
+SELECT t1ha2_128('12345678901234567890123456789012'); -- 32 bytes
+                 t1ha2_128                 
+-------------------------------------------
+ {-304780169492891629,4998773700744081914}
+(1 row)
+
+SELECT t1ha2_128('123456789012345678901234567890123'); -- 33 bytes
+                 t1ha2_128                  
+--------------------------------------------
+ {5647291091212178291,-6007990192753432188}
+(1 row)
+
+-- Test array access (128-bit hash returns array of two bigints)
+SELECT 
+    (t1ha2_128('hello world'))[1] AS first_64_bits,
+    (t1ha2_128('hello world'))[2] AS second_64_bits;
+    first_64_bits    |    second_64_bits    
+---------------------+----------------------
+ 1462807296381820210 | -5445742058069130137
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 't1ha2_128'
+ORDER BY proname, proargtypes;
+  proname  | provolatile | proisstrict 
+-----------+-------------+-------------
+ t1ha2_128 | i           | t
+ t1ha2_128 | i           | t
+ t1ha2_128 | i           | t
+ t1ha2_128 | i           | t
+ t1ha2_128 | i           | t
+ t1ha2_128 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
