@@ -894,3 +894,75 @@ CREATE OR REPLACE FUNCTION wyhash(bigint, bigint)
 RETURNS bigint
 AS 'MODULE_PATHNAME', 'wyhash_int8_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 64-bit function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash3_64(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash3_64_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 64-bit function for text with custom seed
+CREATE OR REPLACE FUNCTION xxhash3_64(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash3_64_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 64-bit function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash3_64(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash3_64_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 64-bit function for bytea with custom seed
+CREATE OR REPLACE FUNCTION xxhash3_64(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash3_64_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 64-bit function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash3_64(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash3_64_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 64-bit function for integer with custom seed
+CREATE OR REPLACE FUNCTION xxhash3_64(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash3_64_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 128-bit function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash3_128(text)
+RETURNS text
+AS 'MODULE_PATHNAME', 'xxhash3_128_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 128-bit function for text with custom seed
+CREATE OR REPLACE FUNCTION xxhash3_128(text, bigint)
+RETURNS text
+AS 'MODULE_PATHNAME', 'xxhash3_128_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 128-bit function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash3_128(bytea)
+RETURNS text
+AS 'MODULE_PATHNAME', 'xxhash3_128_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 128-bit function for bytea with custom seed
+CREATE OR REPLACE FUNCTION xxhash3_128(bytea, bigint)
+RETURNS text
+AS 'MODULE_PATHNAME', 'xxhash3_128_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 128-bit function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash3_128(integer)
+RETURNS text
+AS 'MODULE_PATHNAME', 'xxhash3_128_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash3 128-bit function for integer with custom seed
+CREATE OR REPLACE FUNCTION xxhash3_128(integer, bigint)
+RETURNS text
+AS 'MODULE_PATHNAME', 'xxhash3_128_int_seed'
+LANGUAGE C IMMUTABLE STRICT;

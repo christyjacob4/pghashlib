@@ -1,0 +1,188 @@
+-- Test basic hash functionality with text
+SELECT xxhash3_128('hello world');
+           xxhash3_128            
+----------------------------------
+ 147f96d3f3faafd6636ba767441fb03b
+(1 row)
+
+-- Test hash with different text inputs
+SELECT xxhash3_128('test string');
+           xxhash3_128            
+----------------------------------
+ 526a4a6caece60c1336a76d7583535b4
+(1 row)
+
+SELECT xxhash3_128('another test');
+           xxhash3_128            
+----------------------------------
+ 557a30f49035e8884ff013fe257b2ec3
+(1 row)
+
+-- Test text input with custom seed
+SELECT xxhash3_128('hello world', 42);
+           xxhash3_128            
+----------------------------------
+ f5cbba26a9da6157b0ab802350ed7d27
+(1 row)
+
+SELECT xxhash3_128('hello world', 123);
+           xxhash3_128            
+----------------------------------
+ 887a32fd928c458a89c7855c04cbfadd
+(1 row)
+
+-- Test bytea input  
+SELECT xxhash3_128('hello world'::bytea);
+           xxhash3_128            
+----------------------------------
+ 147f96d3f3faafd6636ba767441fb03b
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT xxhash3_128('hello world'::bytea, 42);
+           xxhash3_128            
+----------------------------------
+ f5cbba26a9da6157b0ab802350ed7d27
+(1 row)
+
+-- Test integer input
+SELECT xxhash3_128(12345);
+           xxhash3_128            
+----------------------------------
+ bd5a24ca661858c7ee459ca891aa8a6d
+(1 row)
+
+SELECT xxhash3_128(-12345);
+           xxhash3_128            
+----------------------------------
+ 8e7bece1956f59c0c6865617ea181990
+(1 row)
+
+-- Test integer input with custom seed
+SELECT xxhash3_128(12345, 42);
+           xxhash3_128            
+----------------------------------
+ 807e63b1b84170dd4f1863439379a0e0
+(1 row)
+
+SELECT xxhash3_128(-12345, 123);
+           xxhash3_128            
+----------------------------------
+ b58e856073fbded309c82bbf215e8aac
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT xxhash3_128('consistent test') = xxhash3_128('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT xxhash3_128('seed test', 1) != xxhash3_128('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT xxhash3_128('');
+           xxhash3_128            
+----------------------------------
+ 99aa06d3014798d86001c324468d497f
+(1 row)
+
+-- Test single character
+SELECT xxhash3_128('a');
+           xxhash3_128            
+----------------------------------
+ a96faf705af16834e6c632b61e964e1f
+(1 row)
+
+-- Test long string
+SELECT xxhash3_128('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+           xxhash3_128            
+----------------------------------
+ a2cde3f2a47141eb955c53776e9f4f4b
+(1 row)
+
+-- Test different input sizes to verify different algorithm paths
+SELECT xxhash3_128('a');           -- 1 byte (small)
+           xxhash3_128            
+----------------------------------
+ a96faf705af16834e6c632b61e964e1f
+(1 row)
+
+SELECT xxhash3_128('hello');        -- 5 bytes (small)
+           xxhash3_128            
+----------------------------------
+ 6ede9f756eb33c899f8f6a527c5e0770
+(1 row)
+
+SELECT xxhash3_128('hello world!'); -- 12 bytes (small)
+           xxhash3_128            
+----------------------------------
+ ed432f4c44439a2d09829b4fa464dd65
+(1 row)
+
+SELECT xxhash3_128('this is a test string with more than sixteen characters'); -- medium size
+           xxhash3_128            
+----------------------------------
+ b00e9d1eca1472b92c40f069f6cbf6f2
+(1 row)
+
+SELECT xxhash3_128(repeat('x', 250)); -- large size (>240 bytes)
+           xxhash3_128            
+----------------------------------
+ ee81c55e9427c4a2363318a636b235c4
+(1 row)
+
+-- Test that results are 32-character hex strings
+SELECT length(xxhash3_128('test'));
+ length 
+--------
+     32
+(1 row)
+
+SELECT xxhash3_128('test') ~ '^[0-9a-f]{32}$';
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test that different inputs produce different hashes
+SELECT xxhash3_128('input1') != xxhash3_128('input2');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'xxhash3_128'
+ORDER BY proname, proargtypes;
+   proname   | provolatile | proisstrict 
+-------------+-------------+-------------
+ xxhash3_128 | i           | t
+ xxhash3_128 | i           | t
+ xxhash3_128 | i           | t
+ xxhash3_128 | i           | t
+ xxhash3_128 | i           | t
+ xxhash3_128 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+
