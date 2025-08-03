@@ -360,3 +360,75 @@ CREATE OR REPLACE FUNCTION spookyhash128(integer, bigint, bigint)
 RETURNS bigint[]
 AS 'MODULE_PATHNAME', 'spookyhash128_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash32 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash32(text)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'xxhash32_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash32 function for text with custom seed
+CREATE OR REPLACE FUNCTION xxhash32(text, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'xxhash32_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash32 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash32(bytea)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'xxhash32_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash32 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION xxhash32(bytea, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'xxhash32_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash32 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash32(integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'xxhash32_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash32 function for integer with custom seed
+CREATE OR REPLACE FUNCTION xxhash32(integer, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'xxhash32_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash64 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash64(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash64_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash64 function for text with custom seed
+CREATE OR REPLACE FUNCTION xxhash64(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash64_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash64 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash64(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash64_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash64 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION xxhash64(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash64_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash64 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION xxhash64(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash64_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- xxHash64 function for integer with custom seed
+CREATE OR REPLACE FUNCTION xxhash64(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'xxhash64_int_seed'
+LANGUAGE C IMMUTABLE STRICT;

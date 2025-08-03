@@ -1,0 +1,136 @@
+-- Test basic hash functionality with text
+SELECT xxhash32('hello world');
+  xxhash32  
+------------
+ -826579422
+(1 row)
+
+-- Test hash with different text inputs
+SELECT xxhash32('test string');
+ xxhash32  
+-----------
+ 633576710
+(1 row)
+
+SELECT xxhash32('another test');
+ xxhash32  
+-----------
+ 107070056
+(1 row)
+
+-- Test text input with custom seed
+SELECT xxhash32('hello world', 42);
+ xxhash32  
+-----------
+ -69933708
+(1 row)
+
+SELECT xxhash32('hello world', 123);
+  xxhash32   
+-------------
+ -1375582818
+(1 row)
+
+-- Test bytea input
+SELECT xxhash32('hello world'::bytea);
+  xxhash32  
+------------
+ -826579422
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT xxhash32('hello world'::bytea, 42);
+ xxhash32  
+-----------
+ -69933708
+(1 row)
+
+-- Test integer input
+SELECT xxhash32(12345);
+  xxhash32  
+------------
+ -393624961
+(1 row)
+
+SELECT xxhash32(-12345);
+  xxhash32  
+------------
+ 1221658118
+(1 row)
+
+-- Test integer input with custom seed
+SELECT xxhash32(12345, 42);
+  xxhash32   
+-------------
+ -1202603880
+(1 row)
+
+SELECT xxhash32(-12345, 123);
+  xxhash32  
+------------
+ 1538418724
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT xxhash32('consistent test') = xxhash32('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT xxhash32('seed test', 1) != xxhash32('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT xxhash32('');
+ xxhash32 
+----------
+ 46947589
+(1 row)
+
+-- Test single character
+SELECT xxhash32('a');
+  xxhash32  
+------------
+ 1426945110
+(1 row)
+
+-- Test long string
+SELECT xxhash32('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+ xxhash32  
+-----------
+ 375463304
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'xxhash32'
+ORDER BY proname, proargtypes;
+ proname  | provolatile | proisstrict 
+----------+-------------+-------------
+ xxhash32 | i           | t
+ xxhash32 | i           | t
+ xxhash32 | i           | t
+ xxhash32 | i           | t
+ xxhash32 | i           | t
+ xxhash32 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
