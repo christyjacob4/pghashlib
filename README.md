@@ -31,8 +31,9 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
      - [A/B Testing](#ab-testing)
 5. [Compatibility](#compatibility)
 6. [Contributing](#contributing)
-7. [License](#license)
-8. [Acknowledgments](#acknowledgments)
+7. [Roadmap](#roadmap)
+8. [License](#license)
+9. [Acknowledgments](#acknowledgments)
 
 ## Installation
 
@@ -731,6 +732,26 @@ FROM users;
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information on development setup, testing, and contribution guidelines.
+
+## Roadmap
+
+Additional non-cryptographic hash functions planned for future releases:
+
+### **High Priority**
+- [ ] **xxHash** (xxh32, xxh64, xxh3) - Extremely fast general-purpose hashing
+- [ ] **FarmHash** - Google's successor to CityHash with better distribution
+- [ ] **HighwayHash** - SIMD-optimized keyed hash function
+
+### **Medium Priority**
+- [ ] **MetroHash** - Fast alternative with good avalanche properties
+- [ ] **t1ha** - Fast Positive Hash optimized for x86-64
+- [ ] **wyhash** - Simple, fast implementation
+
+### **Specialized**
+- [ ] **Adler-32** - Fast checksum (used in zlib)
+- [ ] **Rabin-Karp** - Rolling hash for sliding windows
+- [ ] **Fletcher's Checksum** - Alternative error detection
+- [ ] **Pearson Hashing** - Simple hash for small data
 
 ## License
 
