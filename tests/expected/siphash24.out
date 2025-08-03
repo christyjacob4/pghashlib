@@ -1,0 +1,137 @@
+-- Test basic hash functionality with text
+SELECT siphash24('hello world');
+      siphash24       
+----------------------
+ -1346196092327471614
+(1 row)
+
+-- Test hash with different text inputs
+SELECT siphash24('test string');
+      siphash24      
+---------------------
+ 6538242980682147663
+(1 row)
+
+SELECT siphash24('another test');
+      siphash24      
+---------------------
+ 6332604165248306578
+(1 row)
+
+-- Test text input with custom seeds (two 32-bit values for 128-bit key)
+SELECT siphash24('hello world', 42, 84);
+      siphash24       
+----------------------
+ -3446223121447519457
+(1 row)
+
+SELECT siphash24('hello world', 123, 456);
+      siphash24       
+----------------------
+ -3511124341161720251
+(1 row)
+
+-- Test bytea input
+SELECT siphash24('hello world'::bytea);
+      siphash24       
+----------------------
+ -1346196092327471614
+(1 row)
+
+-- Test bytea input with custom seeds
+SELECT siphash24('hello world'::bytea, 42, 84);
+      siphash24       
+----------------------
+ -3446223121447519457
+(1 row)
+
+-- Test integer input
+SELECT siphash24(12345);
+      siphash24      
+---------------------
+ 4454067874901363441
+(1 row)
+
+SELECT siphash24(-12345);
+      siphash24       
+----------------------
+ -3806540918107243649
+(1 row)
+
+-- Test integer input with custom seeds
+SELECT siphash24(12345, 42, 84);
+      siphash24      
+---------------------
+ 6027795243152456333
+(1 row)
+
+SELECT siphash24(-12345, 123, 456);
+      siphash24      
+---------------------
+ 4629736804133087624
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT siphash24('consistent test') = siphash24('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT siphash24('seed test', 1, 2) != siphash24('seed test', 3, 4);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT siphash24('');
+      siphash24      
+---------------------
+ 8246050544436514353
+(1 row)
+
+-- Test single character
+SELECT siphash24('a');
+      siphash24      
+---------------------
+ 3144613055062689994
+(1 row)
+
+-- Test long string
+SELECT siphash24('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+     siphash24     
+-------------------
+ 64951999282399002
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'siphash24'
+ORDER BY proname, proargtypes;
+  proname  | provolatile | proisstrict 
+-----------+-------------+-------------
+ siphash24 | i           | t
+ siphash24 | i           | t
+ siphash24 | i           | t
+ siphash24 | i           | t
+ siphash24 | i           | t
+ siphash24 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

@@ -252,3 +252,39 @@ CREATE OR REPLACE FUNCTION lookup3be(integer, integer)
 RETURNS integer
 AS 'MODULE_PATHNAME', 'lookup3be_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- SipHash24 function for text (default key)
+CREATE OR REPLACE FUNCTION siphash24(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'siphash24_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SipHash24 function for text with custom seeds (two 32-bit values for 128-bit key)
+CREATE OR REPLACE FUNCTION siphash24(text, integer, integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'siphash24_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SipHash24 function for bytea (default key)
+CREATE OR REPLACE FUNCTION siphash24(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'siphash24_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SipHash24 function for bytea with custom seeds (two 32-bit values for 128-bit key)
+CREATE OR REPLACE FUNCTION siphash24(bytea, integer, integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'siphash24_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SipHash24 function for integer (default key)
+CREATE OR REPLACE FUNCTION siphash24(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'siphash24_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- SipHash24 function for integer with custom seeds (two 32-bit values for 128-bit key)
+CREATE OR REPLACE FUNCTION siphash24(integer, integer, integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'siphash24_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
