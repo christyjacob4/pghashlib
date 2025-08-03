@@ -147,9 +147,9 @@ wyhash(const void *key, size_t len, uint64_t seed, const uint64_t *secret)
 
 /* PostgreSQL function wrappers */
 
-/* Convert data to bytes and get length */
+/* Convert text/bytea data to bytes and get length */
 static inline void
-get_data_and_length(Datum input, Oid input_type, const uint8_t **data, size_t *len)
+get_text_data_and_length(Datum input, Oid input_type, const uint8_t **data, size_t *len)
 {
     switch (input_type)
     {
@@ -168,20 +168,6 @@ get_data_and_length(Datum input, Oid input_type, const uint8_t **data, size_t *l
             *len = VARSIZE_ANY_EXHDR(ba);
             break;
         }
-        case INT4OID:
-        {
-            int32 val = DatumGetInt32(input);
-            *data = (const uint8_t *)&val;
-            *len = sizeof(int32);
-            break;
-        }
-        case INT8OID:
-        {
-            int64 val = DatumGetInt64(input);
-            *data = (const uint8_t *)&val;
-            *len = sizeof(int64);
-            break;
-        }
         default:
             ereport(ERROR,
                     (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
@@ -198,7 +184,7 @@ wyhash_text(PG_FUNCTION_ARGS)
     size_t len;
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), get_fn_expr_argtype(fcinfo->flinfo, 0), &data, &len);
+    get_text_data_and_length(PG_GETARG_DATUM(0), get_fn_expr_argtype(fcinfo->flinfo, 0), &data, &len);
     
     hash = wyhash(data, len, 0, _wyp);
     PG_RETURN_INT64((int64_t)hash);
@@ -214,7 +200,7 @@ wyhash_text_seed(PG_FUNCTION_ARGS)
     uint64_t seed = (uint64_t)PG_GETARG_INT64(1);
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), get_fn_expr_argtype(fcinfo->flinfo, 0), &data, &len);
+    get_text_data_and_length(PG_GETARG_DATUM(0), get_fn_expr_argtype(fcinfo->flinfo, 0), &data, &len);
     
     hash = wyhash(data, len, seed, _wyp);
     PG_RETURN_INT64((int64_t)hash);
@@ -229,7 +215,7 @@ wyhash_bytea(PG_FUNCTION_ARGS)
     size_t len;
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), BYTEAOID, &data, &len);
+    get_text_data_and_length(PG_GETARG_DATUM(0), BYTEAOID, &data, &len);
     
     hash = wyhash(data, len, 0, _wyp);
     PG_RETURN_INT64((int64_t)hash);
@@ -245,7 +231,7 @@ wyhash_bytea_seed(PG_FUNCTION_ARGS)
     uint64_t seed = (uint64_t)PG_GETARG_INT64(1);
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), BYTEAOID, &data, &len);
+    get_text_data_and_length(PG_GETARG_DATUM(0), BYTEAOID, &data, &len);
     
     hash = wyhash(data, len, seed, _wyp);
     PG_RETURN_INT64((int64_t)hash);
@@ -256,13 +242,10 @@ PG_FUNCTION_INFO_V1(wyhash_int4);
 Datum
 wyhash_int4(PG_FUNCTION_ARGS)
 {
-    const uint8_t *data;
-    size_t len;
+    int32 val = PG_GETARG_INT32(0);
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), INT4OID, &data, &len);
-    
-    hash = wyhash(data, len, 0, _wyp);
+    hash = wyhash(&val, sizeof(int32), 0, _wyp);
     PG_RETURN_INT64((int64_t)hash);
 }
 
@@ -271,14 +254,11 @@ PG_FUNCTION_INFO_V1(wyhash_int4_seed);
 Datum
 wyhash_int4_seed(PG_FUNCTION_ARGS)
 {
-    const uint8_t *data;
-    size_t len;
+    int32 val = PG_GETARG_INT32(0);
     uint64_t seed = (uint64_t)PG_GETARG_INT64(1);
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), INT4OID, &data, &len);
-    
-    hash = wyhash(data, len, seed, _wyp);
+    hash = wyhash(&val, sizeof(int32), seed, _wyp);
     PG_RETURN_INT64((int64_t)hash);
 }
 
@@ -287,13 +267,10 @@ PG_FUNCTION_INFO_V1(wyhash_int8);
 Datum
 wyhash_int8(PG_FUNCTION_ARGS)
 {
-    const uint8_t *data;
-    size_t len;
+    int64 val = PG_GETARG_INT64(0);
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), INT8OID, &data, &len);
-    
-    hash = wyhash(data, len, 0, _wyp);
+    hash = wyhash(&val, sizeof(int64), 0, _wyp);
     PG_RETURN_INT64((int64_t)hash);
 }
 
@@ -302,13 +279,10 @@ PG_FUNCTION_INFO_V1(wyhash_int8_seed);
 Datum
 wyhash_int8_seed(PG_FUNCTION_ARGS)
 {
-    const uint8_t *data;
-    size_t len;
+    int64 val = PG_GETARG_INT64(0);
     uint64_t seed = (uint64_t)PG_GETARG_INT64(1);
     uint64_t hash;
     
-    get_data_and_length(PG_GETARG_DATUM(0), INT8OID, &data, &len);
-    
-    hash = wyhash(data, len, seed, _wyp);
+    hash = wyhash(&val, sizeof(int64), seed, _wyp);
     PG_RETURN_INT64((int64_t)hash);
 }
