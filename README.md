@@ -92,23 +92,8 @@ SELECT * FROM large_table WHERE murmurhash3_32(id::text) % 100 < 10;
 
 ## Documentation
 
-For detailed algorithm documentation, usage examples, and implementation details, see [docs/README.md](docs/README.md).
-
-### Performance Characteristics
-
-- **Fastest**: WyHash, t1ha0, xxHash
-- **Cryptographic Security**: SipHash-2-4, HighwayHash
-- **Best Distribution**: CityHash, FarmHash, MetroHash
-- **128-bit Output**: CityHash128, SpookyHash128, MetroHash128, t1ha2_128, HighwayHash128
-- **256-bit Output**: HighwayHash256
-
-### Use Case Recommendations
-
-- **General Purpose**: WyHash, xxHash64, MurmurHash3
-- **Data Partitioning**: CityHash64, FarmHash64
-- **Security Sensitive**: SipHash-2-4, HighwayHash
-- **Large Data**: HighwayHash (SIMD-optimized)
-- **Cross-Platform**: t1ha1, lookup3le
+- **[Getting Started Guide](docs/getting-started.md)** - Learn how to use hash functions with practical examples and common use cases
+- **[Algorithm Reference](docs/README.md)** - Complete documentation for all hash functions with detailed examples
 
 ## Compatibility
 
