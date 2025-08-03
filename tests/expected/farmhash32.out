@@ -1,0 +1,137 @@
+-- Test basic hash functionality with text
+SELECT farmhash32('hello world');
+ farmhash32  
+-------------
+ -1820218123
+(1 row)
+
+-- Test hash with different text inputs
+SELECT farmhash32('test string');
+ farmhash32 
+------------
+ 1214745034
+(1 row)
+
+SELECT farmhash32('another test');
+ farmhash32 
+------------
+  497794167
+(1 row)
+
+-- Test text input with custom seed
+SELECT farmhash32('hello world', 42);
+ farmhash32  
+-------------
+ -1820218123
+(1 row)
+
+SELECT farmhash32('hello world', 123);
+ farmhash32  
+-------------
+ -1820218123
+(1 row)
+
+-- Test bytea input
+SELECT farmhash32('hello world'::bytea);
+ farmhash32  
+-------------
+ -1820218123
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT farmhash32('hello world'::bytea, 42);
+ farmhash32  
+-------------
+ -1820218123
+(1 row)
+
+-- Test integer input
+SELECT farmhash32(12345);
+ farmhash32  
+-------------
+ -1854969238
+(1 row)
+
+SELECT farmhash32(-12345);
+ farmhash32 
+------------
+ 1199458747
+(1 row)
+
+-- Test integer input with custom seed
+SELECT farmhash32(12345, 42);
+ farmhash32  
+-------------
+ -1854969238
+(1 row)
+
+SELECT farmhash32(-12345, 123);
+ farmhash32 
+------------
+ 1199458747
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT farmhash32('consistent test') = farmhash32('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT farmhash32('seed test', 1) != farmhash32('seed test', 2);
+ ?column? 
+----------
+ f
+(1 row)
+
+-- Test empty string
+SELECT farmhash32('');
+ farmhash32 
+------------
+  282426122
+(1 row)
+
+-- Test single character
+SELECT farmhash32('a');
+ farmhash32 
+------------
+ 1614816345
+(1 row)
+
+-- Test long string
+SELECT farmhash32('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+ farmhash32 
+------------
+ -301671558
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'farmhash32'
+ORDER BY proname, proargtypes;
+  proname   | provolatile | proisstrict 
+------------+-------------+-------------
+ farmhash32 | i           | t
+ farmhash32 | i           | t
+ farmhash32 | i           | t
+ farmhash32 | i           | t
+ farmhash32 | i           | t
+ farmhash32 | i           | t
+(6 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

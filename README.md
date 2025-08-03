@@ -1,6 +1,6 @@
 # pghashlib
 
-pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, lookup2, lookup3be, and lookup3le algorithms.
+pghashlib is a PostgreSQL extension providing high-performance hash functions for data processing and analysis. Currently includes MurmurHash3, CRC32, CityHash64, CityHash128, SipHash-2-4, SpookyHash, xxHash32, xxHash64, FarmHash32, FarmHash64, lookup2, lookup3be, and lookup3le algorithms.
 
 ## Table of Contents
 
@@ -23,6 +23,8 @@ pghashlib is a PostgreSQL extension providing high-performance hash functions fo
    - [spookyhash128](#spookyhash128)
    - [xxhash32](#xxhash32)
    - [xxhash64](#xxhash64)
+   - [farmhash32](#farmhash32)
+   - [farmhash64](#farmhash64)
    - [lookup2](#lookup2)
    - [lookup3be](#lookup3be)
    - [lookup3le](#lookup3le)
@@ -131,6 +133,8 @@ CREATE EXTENSION hashlib;
 - **SpookyHash**: Fast 128-bit hash function by Bob Jenkins, optimized for 64-bit processors with excellent avalanche properties
 - **xxHash32**: Extremely fast 32-bit non-cryptographic hash function optimized for speed
 - **xxHash64**: Extremely fast 64-bit non-cryptographic hash function optimized for speed
+- **FarmHash32**: Google's successor to CityHash with improved distribution properties (32-bit)
+- **FarmHash64**: Google's successor to CityHash with improved distribution properties (64-bit)
 - **lookup2**: Bob Jenkins' lookup2 hash function - fast and well-distributed
 - **lookup3be**: Bob Jenkins' lookup3 hash function with big-endian byte order - improved version of lookup2
 - **lookup3le**: Bob Jenkins' lookup3 hash function with little-endian byte order - optimized for Intel/AMD systems
@@ -152,6 +156,8 @@ CREATE EXTENSION hashlib;
 | `spookyhash128` | `text`, `bytea`, `integer` | Yes (2 seeds) | `bigint[]` | 128-bit SpookyHash - returns array of two 64-bit values |
 | `xxhash32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit xxHash - extremely fast non-cryptographic hash |
 | `xxhash64` | `text`, `bytea`, `integer` | Yes | `bigint` | 64-bit xxHash - extremely fast non-cryptographic hash |
+| `farmhash32` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit FarmHash - Google's successor to CityHash |
+| `farmhash64` | `text`, `bytea`, `integer` | Yes (2 seeds) | `bigint` | 64-bit FarmHash - Google's successor to CityHash |
 | `lookup2` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup2 - Bob Jenkins' hash function |
 | `lookup3be` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3be - Bob Jenkins' lookup3 with big-endian order |
 | `lookup3le` | `text`, `bytea`, `integer` | Yes | `integer` | 32-bit lookup3le - Bob Jenkins' lookup3 with little-endian order |
@@ -504,6 +510,116 @@ SELECT
 
 </details>
 
+### farmhash32
+
+FarmHash32 is Google's 32-bit successor to CityHash, designed for better distribution properties while maintaining high performance.
+
+**Signatures:**
+- `farmhash32(text)` → `integer`
+- `farmhash32(text, integer)` → `integer`
+- `farmhash32(bytea)` → `integer`
+- `farmhash32(bytea, integer)` → `integer`
+- `farmhash32(integer)` → `integer`
+- `farmhash32(integer, integer)` → `integer`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): Seed value (default: 0)
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT farmhash32('hello world');
+-- Result: Fast 32-bit FarmHash
+
+-- Hash text with custom seed
+SELECT farmhash32('hello world', 42);
+-- Result: Fast 32-bit FarmHash with custom seed
+
+-- Hash bytea data
+SELECT farmhash32('hello world'::bytea);
+-- Result: Fast 32-bit FarmHash of bytea data
+
+-- Hash bytea with custom seed
+SELECT farmhash32('hello world'::bytea, 42);
+-- Result: Fast 32-bit FarmHash with custom seed
+
+-- Hash integer values
+SELECT farmhash32(12345);
+-- Result: Fast 32-bit FarmHash of integer
+
+-- Hash integer with custom seed
+SELECT farmhash32(12345, 42);
+-- Result: Fast 32-bit FarmHash with custom seed
+```
+
+</details>
+
+### farmhash64
+
+FarmHash64 is Google's 64-bit successor to CityHash, designed for better distribution properties with support for dual seed hashing.
+
+**Signatures:**
+- `farmhash64(text)` → `bigint`
+- `farmhash64(text, bigint)` → `bigint`
+- `farmhash64(text, bigint, bigint)` → `bigint`
+- `farmhash64(bytea)` → `bigint`
+- `farmhash64(bytea, bigint)` → `bigint`
+- `farmhash64(bytea, bigint, bigint)` → `bigint`
+- `farmhash64(integer)` → `bigint`
+- `farmhash64(integer, bigint)` → `bigint`
+- `farmhash64(integer, bigint, bigint)` → `bigint`
+
+**Parameters:**
+- First parameter: Input data to hash (`text`, `bytea`, or `integer`)
+- Second parameter (optional): First seed value (default: 0)
+- Third parameter (optional): Second seed value for dual seed hashing
+
+<details>
+<summary><strong>Examples</strong></summary>
+
+```sql
+-- Hash text with default seed
+SELECT farmhash64('hello world');
+-- Result: Fast 64-bit FarmHash
+
+-- Hash text with custom seed
+SELECT farmhash64('hello world', 42);
+-- Result: Fast 64-bit FarmHash with custom seed
+
+-- Hash text with two seeds for stronger customization
+SELECT farmhash64('hello world', 42, 84);
+-- Result: Fast 64-bit FarmHash with dual seeds
+
+-- Hash bytea data
+SELECT farmhash64('hello world'::bytea);
+-- Result: Fast 64-bit FarmHash of bytea data
+
+-- Hash bytea with custom seed
+SELECT farmhash64('hello world'::bytea, 42);
+-- Result: Fast 64-bit FarmHash with custom seed
+
+-- Hash bytea with two seeds
+SELECT farmhash64('hello world'::bytea, 42, 84);
+-- Result: Fast 64-bit FarmHash with dual seeds
+
+-- Hash integer values
+SELECT farmhash64(12345);
+-- Result: Fast 64-bit FarmHash of integer
+
+-- Hash integer with custom seed
+SELECT farmhash64(12345, 42);
+-- Result: Fast 64-bit FarmHash with custom seed
+
+-- Hash integer with two seeds
+SELECT farmhash64(12345, 42, 84);
+-- Result: Fast 64-bit FarmHash with dual seeds
+```
+
+</details>
+
 ### lookup2
 
 lookup2 is Bob Jenkins' hash function, designed for fast hashing with good distribution properties.
@@ -839,7 +955,7 @@ Additional non-cryptographic hash functions planned for future releases:
 
 ### **High Priority**
 - [x] **xxHash** (xxh32, xxh64) - Extremely fast general-purpose hashing
-- [ ] **FarmHash** - Google's successor to CityHash with better distribution
+- [x] **FarmHash** - Google's successor to CityHash with better distribution
 - [ ] **HighwayHash** - SIMD-optimized keyed hash function
 
 ### **Medium Priority**
@@ -864,6 +980,7 @@ This project is licensed under the PostgreSQL License - see the [LICENSE](LICENS
 - SipHash-2-4 algorithm by Jean-Philippe Aumasson and Daniel J. Bernstein
 - SpookyHash algorithm by Bob Jenkins
 - xxHash algorithm by Yann Collet
+- FarmHash algorithm by Google Inc.
 - lookup2 and lookup3be algorithms by Bob Jenkins
 - PostgreSQL Extension Building Infrastructure (PGXS)
 - PostgreSQL Community for guidance and support

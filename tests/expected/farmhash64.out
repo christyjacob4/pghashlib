@@ -1,0 +1,180 @@
+-- Test basic hash functionality with text
+SELECT farmhash64('hello world');
+      farmhash64      
+----------------------
+ -8450717619353897261
+(1 row)
+
+-- Test hash with different text inputs
+SELECT farmhash64('test string');
+     farmhash64     
+--------------------
+ 105608706600804759
+(1 row)
+
+SELECT farmhash64('another test');
+      farmhash64      
+----------------------
+ -6700814863853966089
+(1 row)
+
+-- Test text input with custom seed
+SELECT farmhash64('hello world', 42);
+      farmhash64      
+----------------------
+ -1244860798864517027
+(1 row)
+
+SELECT farmhash64('hello world', 123);
+     farmhash64      
+---------------------
+ 9141747532868802283
+(1 row)
+
+-- Test text input with two seeds
+SELECT farmhash64('hello world', 42, 84);
+     farmhash64      
+---------------------
+ 7680464614021323063
+(1 row)
+
+SELECT farmhash64('hello world', 123, 456);
+     farmhash64      
+---------------------
+ 7269740330323591784
+(1 row)
+
+-- Test bytea input
+SELECT farmhash64('hello world'::bytea);
+      farmhash64      
+----------------------
+ -8450717619353897261
+(1 row)
+
+-- Test bytea input with custom seed
+SELECT farmhash64('hello world'::bytea, 42);
+      farmhash64      
+----------------------
+ -1244860798864517027
+(1 row)
+
+-- Test bytea input with two seeds
+SELECT farmhash64('hello world'::bytea, 42, 84);
+     farmhash64      
+---------------------
+ 7680464614021323063
+(1 row)
+
+-- Test integer input
+SELECT farmhash64(12345);
+     farmhash64      
+---------------------
+ 8183097863398318022
+(1 row)
+
+SELECT farmhash64(-12345);
+     farmhash64     
+--------------------
+ 939011627313479044
+(1 row)
+
+-- Test integer input with custom seed
+SELECT farmhash64(12345, 42);
+      farmhash64      
+----------------------
+ -7054332135380117230
+(1 row)
+
+SELECT farmhash64(-12345, 123);
+      farmhash64      
+----------------------
+ -4136660701849820501
+(1 row)
+
+-- Test integer input with two seeds
+SELECT farmhash64(12345, 42, 84);
+      farmhash64      
+----------------------
+ -6954734034394801330
+(1 row)
+
+SELECT farmhash64(-12345, 123, 456);
+     farmhash64      
+---------------------
+ 1883579789442367539
+(1 row)
+
+-- Test consistency (same input should give same hash)
+SELECT farmhash64('consistent test') = farmhash64('consistent test');
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test seed effect (same input, different seeds should give different hashes)
+SELECT farmhash64('seed test', 1) != farmhash64('seed test', 2);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test two seeds effect (same input, different seed combinations should give different hashes)
+SELECT farmhash64('seed test', 1, 2) != farmhash64('seed test', 3, 4);
+ ?column? 
+----------
+ t
+(1 row)
+
+-- Test empty string
+SELECT farmhash64('');
+      farmhash64      
+----------------------
+ -7286425919675154353
+(1 row)
+
+-- Test single character
+SELECT farmhash64('a');
+      farmhash64      
+----------------------
+ -5528939962900187677
+(1 row)
+
+-- Test long string
+SELECT farmhash64('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.');
+      farmhash64      
+----------------------
+ -5153988286974445054
+(1 row)
+
+-- Test function properties
+SELECT 
+    proname,
+    provolatile,
+    proisstrict
+FROM pg_proc 
+WHERE proname = 'farmhash64'
+ORDER BY proname, proargtypes;
+  proname   | provolatile | proisstrict 
+------------+-------------+-------------
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+ farmhash64 | i           | t
+(9 rows)
+
+-- Test extension metadata
+SELECT 
+    extname,
+    extversion
+FROM pg_extension 
+WHERE extname = 'hashlib';
+ extname | extversion 
+---------+------------
+ hashlib | 0.0.1
+(1 row)
+

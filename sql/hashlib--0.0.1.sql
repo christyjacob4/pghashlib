@@ -432,3 +432,93 @@ CREATE OR REPLACE FUNCTION xxhash64(integer, bigint)
 RETURNS bigint
 AS 'MODULE_PATHNAME', 'xxhash64_int_seed'
 LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash32 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION farmhash32(text)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'farmhash32_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash32 function for text with custom seed
+CREATE OR REPLACE FUNCTION farmhash32(text, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'farmhash32_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash32 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION farmhash32(bytea)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'farmhash32_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash32 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION farmhash32(bytea, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'farmhash32_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash32 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION farmhash32(integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'farmhash32_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash32 function for integer with custom seed
+CREATE OR REPLACE FUNCTION farmhash32(integer, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'farmhash32_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for text (default seed = 0)
+CREATE OR REPLACE FUNCTION farmhash64(text)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_text'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for text with custom seed
+CREATE OR REPLACE FUNCTION farmhash64(text, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_text_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for text with two seeds
+CREATE OR REPLACE FUNCTION farmhash64(text, bigint, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_text_seeds'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for bytea (default seed = 0)
+CREATE OR REPLACE FUNCTION farmhash64(bytea)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_bytea'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for bytea with custom seed
+CREATE OR REPLACE FUNCTION farmhash64(bytea, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_bytea_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for bytea with two seeds
+CREATE OR REPLACE FUNCTION farmhash64(bytea, bigint, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_bytea_seeds'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for integer (default seed = 0)
+CREATE OR REPLACE FUNCTION farmhash64(integer)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_int'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for integer with custom seed
+CREATE OR REPLACE FUNCTION farmhash64(integer, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_int_seed'
+LANGUAGE C IMMUTABLE STRICT;
+
+-- FarmHash64 function for integer with two seeds
+CREATE OR REPLACE FUNCTION farmhash64(integer, bigint, bigint)
+RETURNS bigint
+AS 'MODULE_PATHNAME', 'farmhash64_int_seeds'
+LANGUAGE C IMMUTABLE STRICT;
